@@ -1,9 +1,9 @@
 #' @export
-source_function <- function(code, includes = NULL, remap = FALSE, show = FALSE) {
+source_function <- function(code, includes = NULL, no_remap = TRUE, show = FALSE) {
   code <- remove_leading_blank_lines(code)
   code <- add_export_attribute(code)
 
-  out <- source_code(code, includes = includes, remap = remap, show = show)
+  out <- source_code(code, includes = includes, no_remap = no_remap, show = show)
 
   out[[1]]
 }

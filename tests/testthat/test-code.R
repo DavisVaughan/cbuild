@@ -56,9 +56,9 @@ test_that("must have an attribute tag", {
 })
 
 # ------------------------------------------------------------------------------
-# `remap`
+# `no_remap`
 
-test_that("can source with remap", {
+test_that("can source without remapping", {
   code <- "
     // [[ export ]]
     SEXP fn(SEXP x) {
@@ -66,7 +66,7 @@ test_that("can source with remap", {
     }
   "
 
-  x <- source_code(code, remap = TRUE)
+  x <- source_code(code, no_remap = FALSE)
 
   expect_equal(x$fn(1), 1)
 })

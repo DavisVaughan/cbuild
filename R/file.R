@@ -1,5 +1,5 @@
 #' @export
-source_file <- function(file, includes = NULL, remap = FALSE, show = FALSE) {
+source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
   file <- normalizePath(file, mustWork = TRUE)
 
   lines <- read_lines(file)
@@ -14,7 +14,7 @@ source_file <- function(file, includes = NULL, remap = FALSE, show = FALSE) {
     lines <- add_provided_includes(lines, includes)
   }
 
-  if (!remap) {
+  if (no_remap) {
     lines <- add_no_remap(lines)
   }
 
