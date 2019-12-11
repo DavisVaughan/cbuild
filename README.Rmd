@@ -68,7 +68,7 @@ fns <- source_code("
   // [[ export ]]
   SEXP fn2(SEXP x, SEXP y) {
     double result = REAL(x)[0] + REAL(y)[0];
-    return Rf_ScalarInteger(result);
+    return Rf_ScalarReal(result);
   }
 ")
 
