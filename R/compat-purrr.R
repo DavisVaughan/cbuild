@@ -57,9 +57,10 @@ pluck_cpl <- function(.x, .f) {
 map2 <- function(.x, .y, .f, ...) {
   out <- mapply(.f, .x, .y, MoreArgs = list(...), SIMPLIFY = FALSE)
   if (length(out) == length(.x)) {
-    set_names(out, names(.x))
+    names(out) <- names(.x)
+    out
   } else {
-    set_names(out, NULL)
+    names(out) <- NULL
   }
 }
 map2_lgl <- function(.x, .y, .f, ...) {
