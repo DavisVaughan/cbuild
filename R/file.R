@@ -36,8 +36,8 @@ source_file <- function(file, includes = TRUE, remap = FALSE, show = FALSE) {
 
   dll_info <- dyn.load(path_so)
 
-  out <- map(info, function(x) make_function(x$name_symbol, x$args, dll_info))
-  names(out) <- map_chr(info, function(x) x$name)
+  out <- map(info, function(x) make_function(x$name_export, x$args, dll_info))
+  names(out) <- map_chr(info, function(x) x$name_export)
 
   out
 }
@@ -76,7 +76,9 @@ get_pointer_to_symbol <- function(symbol, dll_info) {
   getNativeSymbolInfo(symbol, dll_info)$address
 }
 
-make_function <- function(symbol, args, dll_info) {
+make_function <- function(name, args, dll_info) {
+  symbol <- paste0("cbuild_", name)
+
   fn <- function() {}
 
   pointer <- get_pointer_to_symbol(symbol, dll_info)

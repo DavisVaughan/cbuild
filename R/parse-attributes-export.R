@@ -1,11 +1,34 @@
+# Used for `source_*()` functions, which just care about `export` attributes
+locate_and_parse_export_attributes <- function(lines) {
+  attribute_df <- locate_and_parse_attributes(lines)
+
+  attributes <- attribute_df$attributes
+  attributes <- map(attributes, function(x) x[names(x) == "export"])
+
+  has_export <- map_lgl(attributes, function(x) length(x) == 1L)
+
+  attributes <- attributes[has_export]
+  exports <- map(attributes, function(x) x[[1L]])
+
+  locs <- attribute_df$loc[has_export]
+
+  out <- data.frame(loc = locs)
+  out[["exports"]] <- exports
+
+  out
+}
+
 parse_exports <- function(lines) {
   n_lines <- length(lines)
 
   # Whitespace just causes issues
   lines <- trimws(lines, "both")
 
-  tags <- locate_tags(lines)
-  n_exports <- length(tags$exports)
+  attributes <- locate_and_parse_export_attributes(lines)
+  locs <- attributes$loc
+  exports <- attributes$exports
+
+  n_exports <- length(locs)
 
   if (n_exports == 0L) {
     stop("At least 1 function must be marked for export", call. = FALSE)
@@ -13,7 +36,7 @@ parse_exports <- function(lines) {
 
   out <- vector("list", length = n_exports)
 
-  signature_locs <- tags$exports + 1L
+  signature_locs <- locs + 1L
 
   for (i in seq_len(n_exports)) {
     loc <- signature_locs[[i]]
@@ -59,6 +82,17 @@ parse_exports <- function(lines) {
     name <- substr(signature, 1L, opening_parenthesis_loc - 1L)
     name <- trimws(name, which = "right")
 
+    # Attribute name override with `export(name = value)`
+    name_export <- name
+
+    export <- exports[[i]]
+    has_name_override <- "name" == export$name
+
+    if (any(has_name_override)) {
+      name_row <- which(has_name_override)[[1]]
+      name_export <- export$value[[name_row]]
+    }
+
     if (isTRUE(grepl("\\s", name))) {
       stop("The exported function cannot have any spaces in its name", call. = FALSE)
     }
@@ -80,7 +114,7 @@ parse_exports <- function(lines) {
     args <- split_by_comma(signature)
     args <- parse_arguments(args)
 
-    out[[i]] <- new_function_info(loc, name, args)
+    out[[i]] <- new_function_info(loc, name, name_export, args)
   }
 
   out
@@ -107,75 +141,6 @@ parse_arguments <- function(args) {
 
 # ------------------------------------------------------------------------------
 
-locate_tags <- function(lines) {
-  lines <- trimws(lines, "both")
-
-  # Line numbers are tracked as we locate attributes
-  names(lines) <- seq_along(lines)
-
-  # Detect and remove `//` and any whitespace after it
-  lines <- lines[startsWith(lines, "//")]
-  lines <- substr(lines, 3L, nchar(lines))
-  lines <- trimws(lines, "left")
-  lines <- lines[lines != ""]
-
-  # Detect and remove `[[` and any whitespace after it
-  lines <- lines[startsWith(lines, "[[")]
-  lines <- substr(lines, 3L, nchar(lines))
-  lines <- trimws(lines, "left")
-  lines <- lines[lines != ""]
-
-  # Detect and remove `]]` and any whitespace before it
-  lines <- lines[endsWith(lines, "]]")]
-  lines <- substr(lines, 1L, nchar(lines) - 2L)
-  lines <- trimws(lines, "right")
-  lines <- lines[lines != ""]
-
-  # Pull the line number locations off
-  locs <- as.numeric(names(lines))
-
-  # Separate each potential attribute left by `,` and detect known attributes
-  attributes <- strsplit(lines, ",", fixed = TRUE)
-  attributes <- map(attributes, trimws, which = "both")
-
-  has_export <- map_lgl(attributes, has_attribute, attribute = "cbuild::export")
-  exports <- locs[has_export]
-
-  has_external <- map_lgl(attributes, has_attribute, attribute = "cbuild::external")
-  external <- locs[has_external]
-
-  list(
-    exports = exports,
-    external = external
-  )
-}
-
-has_attribute <- function(x, attribute) {
-  any(attribute %in% x)
-}
-
-locate_text <- function(text, line) {
-  out <- regexpr(text, line, fixed = TRUE)
-
-  if (length(out) != 1L) {
-    stop("Internal error: `line` should have been size one.")
-  }
-
-  if (out == -1L) {
-    NA_integer_
-  } else {
-    as.integer(out)
-  }
-}
-
-locate_opening_parenthesis <- function(line) {
-  locate_text("(", line)
-}
-
-locate_closing_parenthesis <- function(line) {
-  locate_text(")", line)
-}
-
 split_by_comma <- function(x) {
   strsplit(x, ",", fixed = TRUE)[[1]]
 }
@@ -186,13 +151,12 @@ starts_with_SEXP <- function(x) {
 
 # name = character(1) of the original function name
 # args = character(n) of the function names
-new_function_info <- function(loc, name, args) {
+new_function_info <- function(loc, name, name_export, args) {
   n_args <- length(args)
-  name_symbol <- paste0("cbuild_", name)
 
   list(
     name = name,
-    name_symbol = name_symbol,
+    name_export = name_export,
     args = args,
     n_args = n_args,
     loc = loc
@@ -209,7 +173,10 @@ replace_function_names <- function(lines, info) {
   for (i in seq_len(n_functions)) {
     fn_info <- info[[i]]
     signature <- lines[[fn_info$loc]]
-    signature <- gsub(fn_info$name, fn_info$name_symbol, signature, fixed = TRUE)
+
+    name_export <- paste0("cbuild_", fn_info$name_export)
+
+    signature <- gsub(fn_info$name, name_export, signature, fixed = TRUE)
     lines[[fn_info$loc]] <- signature
   }
 

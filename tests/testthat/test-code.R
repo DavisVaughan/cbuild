@@ -1,6 +1,6 @@
 test_that("can source a code block", {
   code <- "
-    // [[ cbuild::export ]]
+    // [[ export ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -12,12 +12,12 @@ test_that("can source a code block", {
 
 test_that("can source two functions", {
   code <- "
-    // [[ cbuild::export ]]
+    // [[ export ]]
     SEXP fn(SEXP x) {
       return x;
     }
 
-    // [[ cbuild::export ]]
+    // [[ export ]]
     SEXP fn2(SEXP x) {
       return x;
     }
@@ -34,7 +34,7 @@ test_that("can source a code block that uses a helper", {
       return x;
     }
 
-    // [[ cbuild::export ]]
+    // [[ export ]]
     SEXP fn(SEXP x) {
       return helper(x);
     }
@@ -57,7 +57,7 @@ test_that("must have an attribute tag", {
 
 test_that("can source with remap", {
   code <- "
-    // [[ cbuild::export ]]
+    // [[ export ]]
     SEXP fn(SEXP x) {
       return ScalarInteger(1);
     }

@@ -10,7 +10,7 @@ source_function <- function(code, remap = FALSE, show = FALSE) {
 
 add_export_attribute <- function(code) {
   c(
-    "// [[ cbuild::export ]]",
+    "// [[ export ]]",
     code
   )
 }
