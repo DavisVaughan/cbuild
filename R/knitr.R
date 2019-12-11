@@ -74,6 +74,8 @@
 #' ```
 #' ``````
 #'
+#' @param options Knitr options.
+#'
 #' @export
 eng_cbuild <- function (options) {
   if (!is_installed("knitr")) {

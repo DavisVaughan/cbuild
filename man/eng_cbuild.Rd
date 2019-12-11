@@ -6,6 +6,9 @@
 \usage{
 eng_cbuild(options)
 }
+\arguments{
+\item{options}{Knitr options.}
+}
 \description{
 This provides a \code{cbuild} engine for \code{knitr}, which is used for rendering
 C chunks. It is automatically registered when cbuild is loaded with
