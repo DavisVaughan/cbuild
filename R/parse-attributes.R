@@ -33,10 +33,7 @@ locate_and_parse_attributes <- function(lines) {
   # `attr(name = value)` through the parser
   attributes <- map(attributes, parse_all_attributes)
 
-  out <- data.frame(loc = locs)
-  out[["attributes"]] <- attributes
-
-  out
+  new_attribute_df(locs, attributes)
 }
 
 parse_all_attributes <- function(x) {
@@ -132,7 +129,7 @@ parse_single_attribute_arguments <- function(x) {
     stop("The attribute argument value has length 0. It must have a value. Parsing: ", problem, call. = FALSE)
   }
 
-  data.frame(name = name, value = value, stringsAsFactors = FALSE)
+  new_argument_df(name, value)
 }
 
 # ------------------------------------------------------------------------------

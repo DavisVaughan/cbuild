@@ -19,3 +19,37 @@ write_lines <- function(file, lines) {
   writeLines(lines, file)
   invisible(file)
 }
+
+new_attribute_df <- function(loc = integer(), attributes = list()) {
+  data_frame(loc = loc, attributes = attributes)
+}
+
+new_argument_df <- function(name = character(), value = character()) {
+  data_frame(name = name, value = value)
+}
+
+data_frame <- function(...) {
+  x <- list(...)
+
+  size <- length(x) == 0L
+
+  if (size) {
+    n <- 0L
+  } else {
+    n <- length(x[[1L]])
+  }
+
+  if (size) {
+    names(x) <- character()
+  }
+
+  new_attributes <- list(
+    names = names(x),
+    class = "data.frame",
+    row.names = .set_row_names(n)
+  )
+
+  attributes(x) <- new_attributes
+
+  x
+}

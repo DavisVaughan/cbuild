@@ -12,10 +12,7 @@ locate_and_parse_export_attributes <- function(lines) {
 
   locs <- attribute_df$loc[has_export]
 
-  out <- data.frame(loc = locs)
-  out[["exports"]] <- exports
-
-  out
+  data_frame(loc = locs, exports = exports)
 }
 
 parse_exports <- function(lines) {
