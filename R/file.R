@@ -61,13 +61,23 @@ source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
   }
 
   dir_tmp <- tempdir()
-  dir_cbuild <- file.path(dir_tmp, "cbuild", fsep = file_sep())
+  dir_cbuild <- file.path(dir_tmp, "cbuild")
 
-  dir.create(dir_cbuild)
-  on.exit(unlink(dir_cbuild, recursive = TRUE, force = TRUE), add = TRUE)
+  if (!dir.exists(dir_cbuild)) {
+    dir.create(dir_cbuild)
+  }
 
   path_src <- tempfile("cbuild_", tmpdir = dir_cbuild, fileext = ".c")
   path_so <- tempfile("cbuild_", tmpdir = dir_cbuild, fileext = .Platform$dynlib.ext)
+
+  # Can only reliably clean up the src file. On windows you can't remove the DLL
+  # as it will be "open" while R is using it
+  on.exit(file.remove(path_src), add = TRUE)
+
+  # Very important for `make` on Windows to swap out the winslashes with
+  # `/` not `\\`, otherwise the SHLIB call will not work
+  path_src <- normalizePath(path_src, winslash = "/", mustWork = FALSE)
+  path_so <- normalizePath(path_so, winslash = "/", mustWork = FALSE)
 
   write_lines(path_src, lines)
 
@@ -85,20 +95,6 @@ source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
 
   out
 }
-
-file_sep <- function() {
-  if (is_windows()) {
-    "\\"
-  } else {
-    "/"
-  }
-}
-
-is_windows <- function () {
-  tolower(Sys.info()[["sysname"]]) == "windows"
-}
-
-
 
 # ------------------------------------------------------------------------------
 
