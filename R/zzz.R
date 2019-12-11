@@ -1,6 +1,6 @@
 # nocov start
 .onLoad <- function(libname, pkgname) {
-  if (getRversion() <= '3.2.0') {
+  if (getRversion() < '3.3.0') {
     startsWith <- function (x, prefix){
       if (!is.character(x) || !is.character(prefix)) {
         stop("non-character object(s)")
