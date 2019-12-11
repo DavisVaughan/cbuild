@@ -9,7 +9,14 @@
 status](https://github.com/DavisVaughan/cbuild/workflows/R-CMD-check/badge.svg)](https://github.com/DavisVaughan/cbuild)
 <!-- badges: end -->
 
-The goal of cbuild is to …
+The goal of cbuild is to provide tools for working with C both
+interactively and when constructing an R package. The two broad goals
+are:
+
+  - Provide a way to interactively source C code into your R session.
+
+  - Provide an automatic registration system similar to `Rcpp::export`
+    for package development.
 
 ## Installation
 
@@ -22,3 +29,52 @@ devtools::install_github("DavisVaughan/cbuild")
 ```
 
 ## Examples
+
+``` r
+library(cbuild)
+```
+
+The easiest way to get started is with `source_function()`, which allows
+you to source a C function from text. It automatically includes `R.h`
+and `Rinternals.h` for you to use.
+
+``` r
+fn <- source_function("
+  SEXP fn(SEXP x) {
+    return x;
+  }
+")
+
+fn(1)
+#> [1] 1
+```
+
+From there, you can use `source_code()` to source larger chunks of code.
+Tag functions that you want to export with `// [[ export ]]`.
+
+``` r
+fns <- source_code("
+  static SEXP helper(SEXP x) {
+    return x;
+  }
+  
+  // [[ export ]]
+  SEXP fn1(SEXP x) {
+    return helper(x);
+  }
+  
+  // [[ export ]]
+  SEXP fn2(SEXP x, SEXP y) {
+    double result = REAL(x)[0] + REAL(y)[0];
+    return Rf_ScalarInteger(result);
+  }
+")
+
+fns$fn1(1)
+#> [1] 1
+
+fns$fn2(1, 2)
+#> [1] 3
+```
+
+If you have a full file to source, you can use `source_file()`.
