@@ -45,9 +45,6 @@ parse_exports <- function(lines) {
     # start of the function
     skip <- FALSE
     while(startsWith(signature, "//")) {
-      loc <- loc + 1L
-      signature <- lines[[loc]]
-
       if (i == n_exports) {
         next_loc <- n_lines
       } else {
@@ -58,6 +55,9 @@ parse_exports <- function(lines) {
         skip <- TRUE
         break
       }
+
+      loc <- loc + 1L
+      signature <- lines[[loc]]
     }
 
     if (skip) {
@@ -100,11 +100,28 @@ parse_exports <- function(lines) {
     signature <- substr(signature, opening_parenthesis_loc + 1L, nchar(signature))
 
     # Locate `)`
-    # TODO - maybe make this more flexible (args over multiple lines)
     closing_parenthesis_loc <- locate_closing_parenthesis(signature)
 
-    if (is.na(closing_parenthesis_loc)) {
-      stop("Cannot find closing parenthesis.", call. = FALSE)
+    # Find `)` if it is over multiple lines
+    loc_temp <- loc
+    while(is.na(closing_parenthesis_loc)) {
+      if (i == n_exports) {
+        next_loc <- n_lines
+      } else {
+        next_loc <- signature_locs[[i + 1L]]
+      }
+
+      if (loc_temp == next_loc) {
+        stop("Cannot find closing parenthesis", call. = FALSE)
+      }
+
+      loc_temp <- loc_temp + 1L
+
+      partial_signature <- lines[[loc_temp]]
+      partial_signature <- trimws(partial_signature, "both")
+
+      signature <- paste(signature, partial_signature)
+      closing_parenthesis_loc <- locate_closing_parenthesis(signature)
     }
 
     # Trim off everything at and after `)`
