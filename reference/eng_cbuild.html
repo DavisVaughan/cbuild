@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • cbuild</title>
+<title>A <code>cbuild</code> engine for <code>knitr</code> — eng_cbuild • cbuild</title>
 
 
 <!-- jquery -->
@@ -35,7 +35,24 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="A <code>cbuild</code> engine for <code>knitr</code> — eng_cbuild" />
+<meta property="og:description" content="This provides a cbuild engine for knitr, which is used for rendering
+C chunks. It is automatically registered when cbuild is loaded with
+library(cbuild), so there is no need to set it manually.
+To use it, create a standard R Markdown chunk, and put cbuild as the
+engine name, like this:```{cbuild}
+// [[ export ]]
+SEXP fn(SEXP x) {
+  return x;
+}
+```
+
+
+The engine is powered by source_code().
+By default, the engine will assign any functions that have been marked
+with // [[ export ]] into the global environment, but this can be
+controlled with the knitr option, cbuild.env, see below." />
+<meta name="twitter:card" content="summary" />
 
 
 
@@ -54,7 +71,7 @@
   </head>
 
   <body>
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -101,60 +118,95 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>A <code>cbuild</code> engine for <code>knitr</code></h1>
+    <small class="dont-index">Source: <a href='https://github.com/DavisVaughan/cbuild/blob/master/R/knitr.R'><code>R/knitr.R</code></a></small>
+    <div class="hidden name"><code>eng_cbuild.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>This provides a <code>cbuild</code> engine for <code>knitr</code>, which is used for rendering
+C chunks. It is automatically registered when cbuild is loaded with
+<code><a href='https://rdrr.io/r/base/library.html'>library(cbuild)</a></code>, so there is no need to set it manually.</p>
+<p>To use it, create a standard R Markdown chunk, and put <code>cbuild</code> as the
+engine name, like this:</p><pre>```{cbuild}
+// [[ export ]]
+SEXP fn(SEXP x) {
+  return x;
+}
+```
+</pre>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+<p>The engine is powered by <code><a href='source_code.html'>source_code()</a></code>.</p>
+<p>By default, the engine will assign any functions that have been marked
+with <code>// [[ export ]]</code> into the global environment, but this can be
+controlled with the knitr option, <code>cbuild.env</code>, see below.</p>
+    </div>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      <tr>
-        
-        <td>
-          <p><code><a href="eng_cbuild.html">eng_cbuild()</a></code> </p>
-        </td>
-        <td><p>A <code>cbuild</code> engine for <code>knitr</code></p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="source_code.html">source_code()</a></code> </p>
-        </td>
-        <td><p>Source a block of text containing C code</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="source_file.html">source_file()</a></code> </p>
-        </td>
-        <td><p>Source a file containing C code</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="source_function.html">source_function()</a></code> </p>
-        </td>
-        <td><p>Source a single C function</p></td>
-      </tr>
-    </tbody>
+    <pre class="usage"><span class='fu'>eng_cbuild</span>(<span class='no'>options</span>)</pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>options</th>
+      <td><p>Knitr options.</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p><code>eng_cbuild()</code> is an alternative to the default C chunk renderer, which
+loads the dynamic library but does not bind the C pointers to any R
+functions.</p>
+    <h2 class="hasAnchor" id="knitr-options"><a class="anchor" href="#knitr-options"></a>Knitr Options</h2>
+
+    
+
+
+<p>There are a number of knitr options that can be set for the cbuild engine.</p><ul>
+<li><p><code>cbuild.includes</code>: Passed on to the <code>includes</code> option of <code><a href='source_code.html'>source_code()</a></code>.</p></li>
+<li><p><code>cbuild.no_remap</code>: Passed on to the <code>no_remap</code> option of <code><a href='source_code.html'>source_code()</a></code>.</p></li>
+<li><p><code>cbuild.env</code>: A single character string specifying the name of a
+pre-existing environment object to create the functions in. If <code>cbuild.env</code>
+is left unset, the default is to assign in the global environment.</p></li>
+</ul>
+
+<p>This is an example of how you could customize all 3 options:</p>
+<p>First create an R chunk with an alternative environment:</p><pre>```{r}
+env &lt;- new.env()
+```
+</pre>
+
+<p>Now create our C chunk:</p><pre>```{cbuild, cbuild.includes = "Rdefines.h", cbuild.env = env, cbuild.no_remap = FALSE}
+// [[ export ]]
+SEXP fn(SEXP x) {
+  // `NUMERIC_POINTER()` is only available in `Rdefines.h`
+  double* p_x = NUMERIC_POINTER(x);
+
+  // Would be `Rf_ScalarReal()` if no remap was done
+  return ScalarReal(p_x[0]);
+}
+```
+</pre>
+
+<p>After running the C chunk, we can do:</p><pre>```{r}
+env$fn(2)
+# [1] 2
+```
+</pre>
+
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#section-all-functions">All functions</a></li>
+      <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#details">Details</a></li>
+      <li><a href="#knitr-options">Knitr Options</a></li>
     </ul>
+
   </div>
 </div>
 
