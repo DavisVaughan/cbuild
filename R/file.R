@@ -192,11 +192,11 @@ r_shlib <- function(path_src, path_so) {
     "R"
   )
 
-  arg_src <- shQuote(path_src)
+  arg_src <- path_src
 
   arg_so <- paste(
     "-o",
-    shQuote(path_so)
+    path_so
   )
 
   cmd <- paste(
