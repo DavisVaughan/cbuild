@@ -1,13 +1,15 @@
 Package: cbuild
-Title: What the Package Does (One Line, Title Case)
+Title: Tools to Make Developing R Packages Interfacing with 'C' Easier
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Davis",
+           family = "Vaughan",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+           email = "davis@rstudio.com")
+Description: The goal of 'cbuild' is to provide two kinds of tools. The first
+   set of tools allow for interactively compiling 'C' code in R. The second
+   set of tools improve the workflow of an R package developer by automatically
+   registering 'C' functions that should be exported to R.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
