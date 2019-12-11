@@ -78,13 +78,14 @@ test_that("can provide includes manually", {
   code <- "
     // [[ export ]]
     SEXP fn(SEXP x) {
-      return AS_LOGICAL(x);
+      double* p_x = NUMERIC_POINTER(x);
+      return Rf_ScalarReal(p_x[0]);
     }
   "
 
   x <- source_code(code, includes = "Rdefines.h")
 
-  expect_equal(x$fn(1), TRUE)
+  expect_equal(x$fn(1), 1)
 })
 
 test_that("must provide at least one include", {
