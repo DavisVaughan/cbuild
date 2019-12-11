@@ -19,6 +19,11 @@
     assign("startsWith", startsWith, envir = asNamespace("cbuild"))
     assign("endsWith", endsWith, envir = asNamespace("cbuild"))
   }
+
+  # Register knitr engine
+  if (requireNamespace("knitr", quietly = TRUE)) {
+    knitr::knit_engines$set(cbuild = asNamespace("cbuild")$eng_cbuild)
+  }
 }
 
 # nocov end
