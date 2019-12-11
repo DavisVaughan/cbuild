@@ -7,6 +7,10 @@
 
 [![R build
 status](https://github.com/DavisVaughan/cbuild/workflows/R-CMD-check/badge.svg)](https://github.com/DavisVaughan/cbuild)
+[![Travis build
+status](https://travis-ci.org/DavisVaughan/cbuild.svg?branch=master)](https://travis-ci.org/DavisVaughan/cbuild)
+[![Codecov test
+coverage](https://codecov.io/gh/DavisVaughan/cbuild/branch/master/graph/badge.svg)](https://codecov.io/gh/DavisVaughan/cbuild?branch=master)
 <!-- badges: end -->
 
 The goal of cbuild is to provide tools for working with C both
