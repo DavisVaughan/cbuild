@@ -11,7 +11,7 @@ read_lines <- function(con, error = TRUE) {
      else warning)(if (is.character(con))
        c("The file ", con, " is not encoded in UTF-8. "),
        "These lines contain invalid UTF-8 characters: ",
-       paste(c(head(i), if (n > 6) "..."), collapse = ", "))
+       paste(c(utils::head(i), if (n > 6) "..."), collapse = ", "))
   x
 }
 
