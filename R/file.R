@@ -1,3 +1,45 @@
+#' Source a file containing C code
+#'
+#' `source_file()` will parse through `file` looking for functions tagged with
+#' `// [[ export ]]` and will compile the file and export those functions to
+#' the R side.
+#'
+#' @param file `[character(1)]`
+#'
+#'   The C file to source.
+#'
+#' @param includes `[NULL / character()]`
+#'
+#'   Extra includes to add manually. By default, `R.h` and `Rinternals.h` are
+#'   included. Specify more includes with their file name. For example, to
+#'   include `#include <Rdefines.h>` you just need to specify `"Rdefines.h"`.
+#'
+#' @param no_remap `[logical(1)]`
+#'
+#'   Should `#define R_NO_REMAP` be defined?
+#'
+#' @param show `[logical(1)]`
+#'
+#'   Should the output of compiling the source code with `R CMD SHLIB` be shown?
+#'
+#' @return
+#' A named list containing the functions specified for export.
+#'
+#' @examples
+#' tf <- tempfile(fileext = ".c")
+#'
+#' code <- "
+#'   // [[ export ]]
+#'   SEXP fn(SEXP x) {
+#'     return x;
+#'   }
+#' "
+#'
+#' writeLines(code, tf)
+#'
+#' sourced <- source_file(tf)
+#'
+#' sourced$fn(1)
 #' @export
 source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
   file <- normalizePath(file, mustWork = TRUE)
@@ -43,6 +85,8 @@ source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
 
   out
 }
+
+# ------------------------------------------------------------------------------
 
 # Thanks Hadley :P
 make_formals <- function(args) {
