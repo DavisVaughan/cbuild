@@ -1,5 +1,5 @@
 #' @export
-source_code <- function(code, includes = TRUE, remap = FALSE, show = FALSE) {
+source_code <- function(code, includes = NULL, remap = FALSE, show = FALSE) {
   temp_file <- tempfile(fileext = ".c")
   on.exit(unlink(temp_file, force = TRUE), add = TRUE)
 

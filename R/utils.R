@@ -53,3 +53,11 @@ data_frame <- function(...) {
 
   x
 }
+
+abort <- function(...) {
+  stop(..., call. = FALSE)
+}
+
+grepl_fixed <- function(x, pattern) {
+  grepl(pattern, x, fixed = TRUE)
+}

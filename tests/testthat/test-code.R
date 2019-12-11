@@ -55,6 +55,9 @@ test_that("must have an attribute tag", {
   expect_error(source_code(code), "At least 1 function")
 })
 
+# ------------------------------------------------------------------------------
+# `remap`
+
 test_that("can source with remap", {
   code <- "
     // [[ export ]]
@@ -66,4 +69,64 @@ test_that("can source with remap", {
   x <- source_code(code, remap = TRUE)
 
   expect_equal(x$fn(1), 1)
+})
+
+# ------------------------------------------------------------------------------
+# `includes`
+
+test_that("can provide includes manually", {
+  code <- "
+    // [[ export ]]
+    SEXP fn(SEXP x) {
+      return AS_LOGICAL(x);
+    }
+  "
+
+  x <- source_code(code, includes = "Rdefines.h")
+
+  expect_equal(x$fn(1), TRUE)
+})
+
+test_that("must provide at least one include", {
+  code <- "
+    // [[ export ]]
+    SEXP fn(SEXP x) {
+      return x;
+    }
+  "
+
+  expect_error(source_code(code, includes = character()), "At least one `includes`")
+})
+
+test_that("don't use angled brackets in includes", {
+  code <- "
+    // [[ export ]]
+    SEXP fn(SEXP x) {
+      return x;
+    }
+  "
+
+  expect_error(source_code(code, includes = "<R.h>"), "should not contain angled brackets")
+})
+
+test_that("don't use `#include` in includes", {
+  code <- "
+    // [[ export ]]
+    SEXP fn(SEXP x) {
+      return x;
+    }
+  "
+
+  expect_error(source_code(code, includes = "#include <R.h>"), "should not contain `#include`")
+})
+
+test_that("includes must be a character", {
+  code <- "
+    // [[ export ]]
+    SEXP fn(SEXP x) {
+      return x;
+    }
+  "
+
+  expect_error(source_code(code, includes = 1), "must be a character vector")
 })

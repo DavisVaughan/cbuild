@@ -1,5 +1,5 @@
 #' @export
-source_file <- function(file, includes = TRUE, remap = FALSE, show = FALSE) {
+source_file <- function(file, includes = NULL, remap = FALSE, show = FALSE) {
   file <- normalizePath(file, mustWork = TRUE)
 
   lines <- read_lines(file)
@@ -8,8 +8,10 @@ source_file <- function(file, includes = TRUE, remap = FALSE, show = FALSE) {
 
   lines <- replace_function_names(lines, info)
 
-  if (includes) {
-    lines <- add_default_includes(lines)
+  lines <- add_default_includes(lines)
+
+  if (!is.null(includes)) {
+    lines <- add_provided_includes(lines, includes)
   }
 
   if (!remap) {
@@ -93,6 +95,41 @@ add_default_includes <- function(lines) {
   c(
     "#include <R.h>",
     "#include <Rinternals.h>",
+    lines
+  )
+}
+
+add_provided_includes <- function(lines, includes) {
+  if (!is.character(includes)) {
+    abort("`includes` must be a character vector, or `NULL`.")
+  }
+
+  if (length(includes) == 0L) {
+    abort("At least one `includes` must be provided if `includes` is not `NULL`.")
+  }
+
+  is_header <- grepl_fixed(includes, ".h")
+
+  if (any(!is_header)) {
+    abort("`includes` must all be header files ending in `.h`.")
+  }
+
+  has_include <- grepl_fixed(includes, "#include")
+
+  if (any(has_include)) {
+    abort("`includes` should not contain `#include`, cbuild will add it for you.")
+  }
+
+  has_angles <- grepl_fixed(includes, "<") | grepl_fixed(includes, ">")
+
+  if (any(has_angles)) {
+    abort("`includes` should not contain angled brackets (`<` or `>`), cbuild will add it for you")
+  }
+
+  includes <- paste0("#include <", includes, ">")
+
+  c(
+    includes,
     lines
   )
 }
