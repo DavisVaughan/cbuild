@@ -61,7 +61,7 @@ source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
   }
 
   dir_tmp <- tempdir()
-  dir_cbuild <- file.path(dir_tmp, "cbuild")
+  dir_cbuild <- file.path(dir_tmp, "cbuild", fsep = file_sep())
 
   dir.create(dir_cbuild)
   on.exit(unlink(dir_cbuild, recursive = TRUE, force = TRUE), add = TRUE)
@@ -85,6 +85,20 @@ source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
 
   out
 }
+
+file_sep <- function() {
+  if (is_windows()) {
+    "\\"
+  } else {
+    "/"
+  }
+}
+
+is_windows <- function () {
+  tolower(Sys.info()[["sysname"]]) == "windows"
+}
+
+
 
 # ------------------------------------------------------------------------------
 
