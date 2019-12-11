@@ -10,6 +10,8 @@ locate_and_parse_export_attributes <- function(lines) {
   attributes <- attributes[has_export]
   exports <- map(attributes, function(x) x[[1L]])
 
+  # TODO - Don't allow `exports(type = external)`
+
   locs <- attribute_df$loc[has_export]
 
   data_frame(loc = locs, exports = exports)
