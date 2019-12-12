@@ -37,7 +37,7 @@
 
 <meta property="og:title" content="Source a block of text containing C code — source_code" />
 <meta property="og:description" content="source_code() will parse through x looking for functions tagged with
-// [[ export ]] and will compile the code block and export those
+// [[ export() ]] and will compile the code block and export those
 functions to the R side." />
 <meta name="twitter:card" content="summary" />
 
@@ -114,7 +114,7 @@ functions to the R side." />
 
     <div class="ref-description">
     <p><code>source_code()</code> will parse through <code>x</code> looking for functions tagged with
-<code>// [[ export ]]</code> and will compile the code block and export those
+<code>// [[ export() ]]</code> and will compile the code block and export those
 functions to the R side.</p>
     </div>
 
@@ -157,12 +157,12 @@ include <code>#include &lt;Rdefines.h&gt;</code> you just need to specify <code>
     return x;
   }
 
-  // [[ export ]]
+  // [[ export() ]]
   SEXP fn1(SEXP x) {
     return helper(x);
   }
 
-  // [[ export ]]
+  // [[ export() ]]
   SEXP fn2(SEXP x, SEXP y) {
     double result = REAL(x)[0] + REAL(y)[0];
     return Rf_ScalarReal(result);
