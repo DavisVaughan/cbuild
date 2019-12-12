@@ -1,6 +1,6 @@
 test_that("can source a code block", {
   code <- "
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -12,12 +12,12 @@ test_that("can source a code block", {
 
 test_that("can source two functions", {
   code <- "
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x) {
       return x;
     }
 
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn2(SEXP x) {
       return x;
     }
@@ -34,7 +34,7 @@ test_that("can source a code block that uses a helper", {
       return x;
     }
 
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x) {
       return helper(x);
     }
@@ -60,7 +60,7 @@ test_that("must have an attribute tag", {
 
 test_that("can source without remapping", {
   code <- "
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x) {
       return ScalarInteger(1);
     }
@@ -76,7 +76,7 @@ test_that("can source without remapping", {
 
 test_that("can provide includes manually", {
   code <- "
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x) {
       double* p_x = NUMERIC_POINTER(x);
       return Rf_ScalarReal(p_x[0]);
@@ -90,7 +90,7 @@ test_that("can provide includes manually", {
 
 test_that("must provide at least one include", {
   code <- "
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -101,7 +101,7 @@ test_that("must provide at least one include", {
 
 test_that("don't use angled brackets in includes", {
   code <- "
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -112,7 +112,7 @@ test_that("don't use angled brackets in includes", {
 
 test_that("don't use `#include` in includes", {
   code <- "
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -123,7 +123,7 @@ test_that("don't use `#include` in includes", {
 
 test_that("includes must be a character", {
   code <- "
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x) {
       return x;
     }

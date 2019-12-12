@@ -16,7 +16,7 @@ C chunks. It is automatically registered when cbuild is loaded with
 
 To use it, create a standard R Markdown chunk, and put \code{cbuild} as the
 engine name, like this:\preformatted{```{cbuild}
-// [[ export ]]
+// [[ export() ]]
 SEXP fn(SEXP x) {
   return x;
 }
@@ -26,7 +26,7 @@ SEXP fn(SEXP x) {
 The engine is powered by \code{\link[=source_code]{source_code()}}.
 
 By default, the engine will assign any functions that have been marked
-with \code{// [[ export ]]} into the global environment, but this can be
+with \code{// [[ export() ]]} into the global environment, but this can be
 controlled with the knitr option, \code{cbuild.env}, see below.
 }
 \details{
@@ -54,7 +54,7 @@ env <- new.env()
 }
 
 Now create our C chunk:\preformatted{```{cbuild, cbuild.includes = "Rdefines.h", cbuild.env = env, cbuild.no_remap = FALSE}
-// [[ export ]]
+// [[ export() ]]
 SEXP fn(SEXP x) {
   // `NUMERIC_POINTER()` is only available in `Rdefines.h`
   double* p_x = NUMERIC_POINTER(x);

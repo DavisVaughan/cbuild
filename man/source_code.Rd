@@ -30,7 +30,7 @@ A named list containing the functions specified for export.
 }
 \description{
 \code{source_code()} will parse through \code{x} looking for functions tagged with
-\code{// [[ export ]]} and will compile the code block and export those
+\code{// [[ export() ]]} and will compile the code block and export those
 functions to the R side.
 }
 \examples{
@@ -39,12 +39,12 @@ code <- "
     return x;
   }
 
-  // [[ export ]]
+  // [[ export() ]]
   SEXP fn1(SEXP x) {
     return helper(x);
   }
 
-  // [[ export ]]
+  // [[ export() ]]
   SEXP fn2(SEXP x, SEXP y) {
     double result = REAL(x)[0] + REAL(y)[0];
     return Rf_ScalarReal(result);

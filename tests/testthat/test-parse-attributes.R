@@ -1,5 +1,3 @@
-# ------------------------------------------------------------------------------
-# No attributes
 
 test_that("correct behavior with no attributes", {
   code <- to_lines("
@@ -10,16 +8,12 @@ test_that("correct behavior with no attributes", {
 
   x <- locate_and_parse_attributes(code)
 
-  expect_equal(x$loc, numeric())
-  expect_equal(x$attributes, list())
+  expect_equal(x, new_attribute_df())
 })
 
-# ------------------------------------------------------------------------------
-# No parenthesis
-
-test_that("can parse a single attribute with no parenthesis", {
+test_that("ignored if no opening brackets", {
   code <- to_lines("
-    // [[ export ]]
+    // export() ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -27,15 +21,12 @@ test_that("can parse a single attribute with no parenthesis", {
 
   x <- locate_and_parse_attributes(code)
 
-  expect_equal(x$loc, 2)
-
-  expect <- list(list(export = new_argument_df()))
-  expect_equal(x$attributes, expect)
+  expect_equal(x, new_attribute_df())
 })
 
-test_that("can parse two attributes with no parenthesis", {
+test_that("ignored if no closing brackets", {
   code <- to_lines("
-    // [[ export && register ]]
+    // [[ export()
     SEXP fn(SEXP x) {
       return x;
     }
@@ -43,20 +34,10 @@ test_that("can parse two attributes with no parenthesis", {
 
   x <- locate_and_parse_attributes(code)
 
-  expect_equal(x$loc, 2)
-
-  expect <- list(list(
-    export = new_argument_df(),
-    register = new_argument_df()
-  ))
-
-  expect_equal(x$attributes, expect)
+  expect_equal(x, new_attribute_df())
 })
 
-# ------------------------------------------------------------------------------
-# Parenthesis
-
-test_that("can parse an attribute with parenthesis", {
+test_that("can parse a single attribute", {
   code <- to_lines("
     // [[ export() ]]
     SEXP fn(SEXP x) {
@@ -67,14 +48,15 @@ test_that("can parse an attribute with parenthesis", {
   x <- locate_and_parse_attributes(code)
 
   expect_equal(x$loc, 2)
+  expect_equal(x$type, "export")
 
-  expect <- list(list(export = new_argument_df()))
-  expect_equal(x$attributes, expect)
+  args <- list(list(name = NA_character_, type = "call"))
+  expect_equal(x$args, args)
 })
 
 test_that("can parse an attribute with an argument", {
   code <- to_lines("
-    // [[ export(name = fancy_fn) ]]
+    // [[ export(name = 'fancy_fn') ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -82,17 +64,13 @@ test_that("can parse an attribute with an argument", {
 
   x <- locate_and_parse_attributes(code)
 
-  expect_equal(x$loc, 2)
-
-  expect <- new_argument_df("name", "fancy_fn")
-  expect <- list(list(export = expect))
-
-  expect_equal(x$attributes, expect)
+  args <- list(list(name = "fancy_fn", type = "call"))
+  expect_equal(x$args, args)
 })
 
 test_that("can parse an attribute with two arguments", {
   code <- to_lines("
-    // [[ export(name = fancy_fn, fancy = stuff) ]]
+    // [[ export(name = 'fancy_fn', type = 'external') ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -100,25 +78,39 @@ test_that("can parse an attribute with two arguments", {
 
   x <- locate_and_parse_attributes(code)
 
-  expect_equal(x$loc, 2)
-
-  expect <- new_argument_df(c("name", "fancy"), c("fancy_fn", "stuff"))
-  expect <- list(list(export = expect))
-
-  expect_equal(x$attributes, expect)
+  args <- list(list(name = "fancy_fn", type = "external"))
+  expect_equal(x$args, args)
 })
 
-# ------------------------------------------------------------------------------
-# Multiple functions
+test_that("can parse two attributes", {
+  code <- to_lines("
+    // [[ export(); register() ]]
+    SEXP fn(SEXP x) {
+      return x;
+    }
+  ")
+
+  x <- locate_and_parse_attributes(code)
+
+  expect_equal(x$loc, c(2, 2))
+  expect_equal(x$type, c("export", "register"))
+
+  args <- list(
+    list(name = NA_character_, type = "call"),
+    list()
+  )
+
+  expect_equal(x$args, args)
+})
 
 test_that("can parse multiple functions with multiple attributes", {
   code <- to_lines("
-    // [[ export(x = y, z = w) && register() ]]
+    // [[ export(name = 'nm', type = 'call'); register() ]]
     SEXP fn(SEXP x) {
       return x;
     }
 
-    // [[ export(foo = bar) ]]
+    // [[ export(name = 'nm2') ]]
     SEXP fn2(SEXP x) {
       return x;
     }
@@ -126,15 +118,16 @@ test_that("can parse multiple functions with multiple attributes", {
 
   x <- locate_and_parse_attributes(code)
 
-  expect_equal(x$loc, c(2, 7))
+  expect_equal(x$loc, c(2, 2, 7))
+  expect_equal(x$type, c("export", "register", "export"))
 
-  args1 <- new_argument_df(c("x", "z"), c("y", "w"))
-  args2 <- new_argument_df()
-  args3 <- new_argument_df("foo", "bar")
+  args <- list(
+    list(name = "nm", type = "call"),
+    list(),
+    list(name = "nm2", type = "call")
+  )
 
-  expect <- list(list(export = args1, register = args2), list(export = args3))
-
-  expect_equal(x$attributes, expect)
+  expect_equal(x$args, args)
 })
 
 # ------------------------------------------------------------------------------
@@ -143,7 +136,7 @@ test_that("can parse multiple functions with multiple attributes", {
 test_that("can generally ignore non-standard spacing", {
   code <- to_lines("
 
-    //[[export(x =y, z= w)&&   register()]]
+    //[[export(name ='fn2', type= 'external');   register()]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -151,13 +144,63 @@ test_that("can generally ignore non-standard spacing", {
 
   x <- locate_and_parse_attributes(code)
 
-  expect_equal(x$loc, 3)
+  expect_equal(x$loc, c(3, 3))
+  expect_equal(x$type, c("export", "register"))
 
-  args1 <- new_argument_df(c("x", "z"), c("y", "w"))
-  args2 <- new_argument_df()
+  args <- list(
+    list(name = "fn2", type = "external"),
+    list()
+  )
 
-  expect <- list(list(export = args1, register = args2))
-
-  expect_equal(x$attributes, expect)
+  expect_equal(x$args, args)
 })
+
+# ------------------------------------------------------------------------------
+# Errors
+
+test_that("error if valid function, but not called with parenthesis", {
+  code <- to_lines("
+    // [[ export ]]
+    SEXP fn(SEXP x) {
+      return x;
+    }
+  ")
+
+  expect_error(
+    locate_and_parse_attributes(code),
+    "like `export[(][)]`, not `export`"
+  )
+})
+
+test_that("error if invalid function", {
+  code <- to_lines("
+    // [[ stuff() ]]
+    SEXP fn(SEXP x) {
+      return x;
+    }
+  ")
+
+  expect_error(
+    locate_and_parse_attributes(code),
+    'could not find function "stuff"'
+  )
+})
+
+test_that("error if invalid function arguments", {
+  code <- to_lines("
+    // [[ export(names = 'fn') ]]
+    SEXP fn(SEXP x) {
+      return x;
+    }
+  ")
+
+  expect_error(
+    locate_and_parse_attributes(code),
+    'unused argument [(]names = "fn"[)]'
+  )
+})
+
+
+
+
 

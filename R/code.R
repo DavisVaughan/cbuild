@@ -1,7 +1,7 @@
 #' Source a block of text containing C code
 #'
 #' `source_code()` will parse through `x` looking for functions tagged with
-#' `// [[ export ]]` and will compile the code block and export those
+#' `// [[ export() ]]` and will compile the code block and export those
 #' functions to the R side.
 #'
 #' @inheritParams source_file
@@ -19,12 +19,12 @@
 #'     return x;
 #'   }
 #'
-#'   // [[ export ]]
+#'   // [[ export() ]]
 #'   SEXP fn1(SEXP x) {
 #'     return helper(x);
 #'   }
 #'
-#'   // [[ export ]]
+#'   // [[ export() ]]
 #'   SEXP fn2(SEXP x, SEXP y) {
 #'     double result = REAL(x)[0] + REAL(y)[0];
 #'     return Rf_ScalarReal(result);

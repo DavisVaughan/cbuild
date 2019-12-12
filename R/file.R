@@ -1,7 +1,7 @@
 #' Source a file containing C code
 #'
 #' `source_file()` will parse through `file` looking for functions tagged with
-#' `// [[ export ]]` and will compile the file and export those functions to
+#' `// [[ export() ]]` and will compile the file and export those functions to
 #' the R side.
 #'
 #' @param file `[character(1)]`
@@ -29,7 +29,7 @@
 #' tf <- tempfile(fileext = ".c")
 #'
 #' code <- "
-#'   // [[ export ]]
+#'   // [[ export() ]]
 #'   SEXP fn(SEXP x) {
 #'     return x;
 #'   }

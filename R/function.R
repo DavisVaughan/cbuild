@@ -2,7 +2,7 @@
 #'
 #' `source_function()` is the most basic way to source a C function to the R
 #' side. It sources a single C function and exports it on the R side. There
-#' is no need to include the `// [[ export ]]` tag when
+#' is no need to include the `// [[ export() ]]` tag when
 #' using `source_function()`, since only one function will be exported.
 #'
 #' @inheritParams source_file
@@ -36,7 +36,7 @@ source_function <- function(x, includes = NULL, no_remap = TRUE, show = FALSE) {
 
 add_export_attribute <- function(x) {
   c(
-    "// [[ export ]]",
+    "// [[ export() ]]",
     x
   )
 }

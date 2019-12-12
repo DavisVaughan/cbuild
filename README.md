@@ -54,7 +54,7 @@ fn(1)
 ```
 
 From there, you can use `source_code()` to source larger chunks of code.
-Tag functions that you want to export with `// [[ export ]]`.
+Tag functions that you want to export with `// [[ export() ]]`.
 
 ``` r
 fns <- source_code("
@@ -62,12 +62,12 @@ fns <- source_code("
     return x;
   }
   
-  // [[ export ]]
+  // [[ export() ]]
   SEXP fn1(SEXP x) {
     return helper(x);
   }
   
-  // [[ export ]]
+  // [[ export() ]]
   SEXP fn2(SEXP x, SEXP y) {
     double result = REAL(x)[0] + REAL(y)[0];
     return Rf_ScalarReal(result);

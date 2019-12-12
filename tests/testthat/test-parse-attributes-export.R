@@ -1,6 +1,6 @@
 test_that("can parse signatures over two lines", {
   code <- to_lines("
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x,
             SEXP y) {
       return x;
@@ -13,7 +13,7 @@ test_that("can parse signatures over two lines", {
 
 test_that("can parse signatures over three lines", {
   code <- to_lines("
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x,
             SEXP y,
             SEXP z) {
@@ -27,7 +27,7 @@ test_that("can parse signatures over three lines", {
 
 test_that("can parse signatures when the closing parenthesis is on its own line", {
   code <- to_lines("
-    // [[ export ]]
+    // [[ export() ]]
     SEXP fn(SEXP x,
             SEXP y,
             SEXP z

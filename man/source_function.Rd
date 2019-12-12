@@ -31,7 +31,7 @@ An R function that calls the compiled C code.
 \description{
 \code{source_function()} is the most basic way to source a C function to the R
 side. It sources a single C function and exports it on the R side. There
-is no need to include the \code{// [[ export ]]} tag when
+is no need to include the \code{// [[ export() ]]} tag when
 using \code{source_function()}, since only one function will be exported.
 }
 \examples{

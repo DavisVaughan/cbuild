@@ -10,7 +10,7 @@
 #'
 #' ``````
 #' ```{cbuild}
-#' // [[ export ]]
+#' // [[ export() ]]
 #' SEXP fn(SEXP x) {
 #'   return x;
 #' }
@@ -20,7 +20,7 @@
 #' The engine is powered by [source_code()].
 #'
 #' By default, the engine will assign any functions that have been marked
-#' with `// [[ export ]]` into the global environment, but this can be
+#' with `// [[ export() ]]` into the global environment, but this can be
 #' controlled with the knitr option, `cbuild.env`, see below.
 #'
 #' @details
@@ -54,7 +54,7 @@
 #'
 #' ``````
 #' ```{cbuild, cbuild.includes = "Rdefines.h", cbuild.env = env, cbuild.no_remap = FALSE}
-#' // [[ export ]]
+#' // [[ export() ]]
 #' SEXP fn(SEXP x) {
 #'   // `NUMERIC_POINTER()` is only available in `Rdefines.h`
 #'   double* p_x = NUMERIC_POINTER(x);

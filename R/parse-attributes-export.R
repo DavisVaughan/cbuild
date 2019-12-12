@@ -2,19 +2,20 @@
 locate_and_parse_export_attributes <- function(lines) {
   attribute_df <- locate_and_parse_attributes(lines)
 
-  attributes <- attribute_df$attributes
-  attributes <- map(attributes, function(x) x[names(x) == "export"])
+  attribute_df <- attribute_df[attribute_df$type == "export", , drop = FALSE]
 
-  has_export <- map_lgl(attributes, function(x) length(x) == 1L)
+  if (nrow(attribute_df) == 0L) {
+    return(attribute_df)
+  }
 
-  attributes <- attributes[has_export]
-  exports <- map(attributes, function(x) x[[1L]])
+  lst_of_one_row_arg_dfs <- map(attribute_df$args, as.data.frame, stringsAsFactors = FALSE)
+  arg_df <- do.call(rbind, lst_of_one_row_arg_dfs)
 
-  # TODO - Don't allow `exports(type = external)`
+  attribute_df$args <- NULL
 
-  locs <- attribute_df$loc[has_export]
+  exports_df <- cbind(attribute_df, arg_df)
 
-  data_frame(loc = locs, exports = exports)
+  exports_df
 }
 
 parse_exports <- function(lines) {
@@ -25,7 +26,7 @@ parse_exports <- function(lines) {
 
   attributes <- locate_and_parse_export_attributes(lines)
   locs <- attributes$loc
-  exports <- attributes$exports
+  names <- attributes$name
 
   n_exports <- length(locs)
 
@@ -84,12 +85,10 @@ parse_exports <- function(lines) {
     # Attribute name override with `export(name = value)`
     name_export <- name
 
-    export <- exports[[i]]
-    has_name_override <- "name" == export$name
-
-    if (any(has_name_override)) {
-      name_row <- which(has_name_override)[[1]]
-      name_export <- export$value[[name_row]]
+    if (is.na(names[[i]])) {
+      name_export <- name
+    } else {
+      name_export <- names[[i]]
     }
 
     if (isTRUE(grepl("\\s", name))) {

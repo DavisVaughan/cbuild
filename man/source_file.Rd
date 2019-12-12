@@ -30,14 +30,14 @@ A named list containing the functions specified for export.
 }
 \description{
 \code{source_file()} will parse through \code{file} looking for functions tagged with
-\code{// [[ export ]]} and will compile the file and export those functions to
+\code{// [[ export() ]]} and will compile the file and export those functions to
 the R side.
 }
 \examples{
 tf <- tempfile(fileext = ".c")
 
 code <- "
-  // [[ export ]]
+  // [[ export() ]]
   SEXP fn(SEXP x) {
     return x;
   }

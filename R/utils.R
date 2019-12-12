@@ -20,12 +20,12 @@ write_lines <- function(file, lines) {
   invisible(file)
 }
 
-new_attribute_df <- function(loc = integer(), attributes = list()) {
-  data_frame(loc = loc, attributes = attributes)
+new_attribute_df <- function(loc = integer(), type = character(), args = list()) {
+  data_frame(loc = loc, type = type, args = args)
 }
 
-new_argument_df <- function(name = character(), value = character()) {
-  data_frame(name = name, value = value)
+new_argument_df <- function(type = character(), args = list()) {
+  data_frame(type = type, args = args)
 }
 
 data_frame <- function(...) {
@@ -56,6 +56,16 @@ data_frame <- function(...) {
 
 abort <- function(...) {
   stop(..., call. = FALSE)
+}
+
+abort_problem_parsing <- function(what, problem) {
+  msg <- paste0(
+    problem,
+    "\n",
+    "Problem parsing: `", what, "`."
+  )
+
+  abort(msg)
 }
 
 grepl_fixed <- function(x, pattern) {
