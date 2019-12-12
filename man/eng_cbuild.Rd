@@ -26,8 +26,8 @@ SEXP fn(SEXP x) {
 The engine is powered by \code{\link[=source_code]{source_code()}}.
 
 By default, the engine will assign any functions that have been marked
-with \code{// [[ export() ]]} into the global environment, but this can be
-controlled with the knitr option, \code{cbuild.env}, see below.
+with \code{// [[ export() ]]} into the \code{knitr::knit_global()} environment, but
+this can be controlled with the knitr option, \code{cbuild.env}, see below.
 }
 \details{
 \code{eng_cbuild()} is an alternative to the default C chunk renderer, which
@@ -43,7 +43,8 @@ There are a number of knitr options that can be set for the cbuild engine.
 \item \code{cbuild.no_remap}: Passed on to the \code{no_remap} option of \code{source_code()}.
 \item \code{cbuild.env}: A single character string specifying the name of a
 pre-existing environment object to create the functions in. If \code{cbuild.env}
-is left unset, the default is to assign in the global environment.
+is left unset, the default is to assign in the \code{knitr::knit_global()}
+environment.
 }
 
 This is an example of how you could customize all 3 options:

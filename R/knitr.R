@@ -20,8 +20,8 @@
 #' The engine is powered by [source_code()].
 #'
 #' By default, the engine will assign any functions that have been marked
-#' with `// [[ export() ]]` into the global environment, but this can be
-#' controlled with the knitr option, `cbuild.env`, see below.
+#' with `// [[ export() ]]` into the `knitr::knit_global()` environment, but
+#' this can be controlled with the knitr option, `cbuild.env`, see below.
 #'
 #' @details
 #' `eng_cbuild()` is an alternative to the default C chunk renderer, which
@@ -38,7 +38,8 @@
 #'
 #' - `cbuild.env`: A single character string specifying the name of a
 #'   pre-existing environment object to create the functions in. If `cbuild.env`
-#'   is left unset, the default is to assign in the global environment.
+#'   is left unset, the default is to assign in the `knitr::knit_global()`
+#'   environment.
 #'
 #' This is an example of how you could customize all 3 options:
 #'
@@ -91,7 +92,7 @@ eng_cbuild <- function (options) {
   }
 
   if (is.null(env)) {
-    env <- globalenv()
+    env <- knitr::knit_global()
   } else {
     env <- get(env, envir = knitr::knit_global())
   }
