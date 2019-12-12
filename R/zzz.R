@@ -31,8 +31,8 @@ cbuild__hook_env <- NULL
   }
 
   # Load hooks
-  assign("export", ns$hook_export, env = cbuild__hook_env)
-  assign("register", ns$hook_register, env = cbuild__hook_env)
+  assign("export", ns$hook_export, envir = cbuild__hook_env)
+  assign("register", ns$hook_register, envir = cbuild__hook_env)
 }
 
 # nocov end
