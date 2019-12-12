@@ -31,7 +31,7 @@ parse_exports <- function(lines) {
   n_exports <- length(locs)
 
   if (n_exports == 0L) {
-    stop("At least 1 function must be marked for export", call. = FALSE)
+    abort("At least 1 function must be marked for export with `// [[ export() ]]`.")
   }
 
   out <- vector("list", length = n_exports)
