@@ -84,7 +84,7 @@ test_that("can parse an attribute with two arguments", {
 
 test_that("can parse two attributes", {
   code <- to_lines("
-    // [[ export(); register() ]]
+    // [[ export(); callable() ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -93,11 +93,11 @@ test_that("can parse two attributes", {
   x <- locate_and_parse_attributes(code)
 
   expect_equal(x$loc, c(2, 2))
-  expect_equal(x$type, c("export", "register"))
+  expect_equal(x$type, c("export", "callable"))
 
   args <- list(
     list(name = NA_character_, type = "call"),
-    list()
+    list(name = NA_character_, hidden = FALSE)
   )
 
   expect_equal(x$args, args)
@@ -105,7 +105,7 @@ test_that("can parse two attributes", {
 
 test_that("can parse multiple functions with multiple attributes", {
   code <- to_lines("
-    // [[ export(name = 'nm', type = 'call'); register() ]]
+    // [[ export(name = 'nm', type = 'call'); callable() ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -119,15 +119,30 @@ test_that("can parse multiple functions with multiple attributes", {
   x <- locate_and_parse_attributes(code)
 
   expect_equal(x$loc, c(2, 2, 7))
-  expect_equal(x$type, c("export", "register", "export"))
+  expect_equal(x$type, c("export", "callable", "export"))
 
   args <- list(
     list(name = "nm", type = "call"),
-    list(),
+    list(name = NA_character_, hidden = FALSE),
     list(name = "nm2", type = "call")
   )
 
   expect_equal(x$args, args)
+})
+
+test_that("can parse an `init` attribute", {
+  code <- to_lines("
+    // [[ init() ]]
+    SEXP fn(SEXP x) {
+      return x;
+    }
+  ")
+
+  x <- locate_and_parse_attributes(code)
+
+  expect <- new_attribute_df(loc = 2, type = "init", args = list(list()))
+
+  expect_equal(x, expect)
 })
 
 # ------------------------------------------------------------------------------
@@ -136,7 +151,7 @@ test_that("can parse multiple functions with multiple attributes", {
 test_that("can generally ignore non-standard spacing", {
   code <- to_lines("
 
-    //[[export(name ='fn2', type= 'external');   register()]]
+    //[[export(name ='fn2', type= 'external');   callable()]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -145,11 +160,11 @@ test_that("can generally ignore non-standard spacing", {
   x <- locate_and_parse_attributes(code)
 
   expect_equal(x$loc, c(3, 3))
-  expect_equal(x$type, c("export", "register"))
+  expect_equal(x$type, c("export", "callable"))
 
   args <- list(
     list(name = "fn2", type = "external"),
-    list()
+    list(name = NA_character_, hidden = FALSE)
   )
 
   expect_equal(x$args, args)
