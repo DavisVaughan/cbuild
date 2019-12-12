@@ -6,7 +6,7 @@ test_that("correct behavior with no attributes", {
     }
   ")
 
-  x <- locate_and_parse_attributes(code)
+  x <- parse_attributes(code)
 
   expect_equal(x, new_attribute_df())
 })
@@ -19,7 +19,7 @@ test_that("ignored if no opening brackets", {
     }
   ")
 
-  x <- locate_and_parse_attributes(code)
+  x <- parse_attributes(code)
 
   expect_equal(x, new_attribute_df())
 })
@@ -32,7 +32,7 @@ test_that("ignored if no closing brackets", {
     }
   ")
 
-  x <- locate_and_parse_attributes(code)
+  x <- parse_attributes(code)
 
   expect_equal(x, new_attribute_df())
 })
@@ -45,10 +45,10 @@ test_that("can parse a single attribute", {
     }
   ")
 
-  x <- locate_and_parse_attributes(code)
+  x <- parse_attributes(code)
 
   expect_equal(x$loc, 2)
-  expect_equal(x$type, "export")
+  expect_equal(x$attribute, "export")
 
   args <- list(list(name = NA_character_, type = "call"))
   expect_equal(x$args, args)
@@ -62,7 +62,7 @@ test_that("can parse an attribute with an argument", {
     }
   ")
 
-  x <- locate_and_parse_attributes(code)
+  x <- parse_attributes(code)
 
   args <- list(list(name = "fancy_fn", type = "call"))
   expect_equal(x$args, args)
@@ -76,7 +76,7 @@ test_that("can parse an attribute with two arguments", {
     }
   ")
 
-  x <- locate_and_parse_attributes(code)
+  x <- parse_attributes(code)
 
   args <- list(list(name = "fancy_fn", type = "external"))
   expect_equal(x$args, args)
@@ -90,10 +90,10 @@ test_that("can parse two attributes", {
     }
   ")
 
-  x <- locate_and_parse_attributes(code)
+  x <- parse_attributes(code)
 
   expect_equal(x$loc, c(2, 2))
-  expect_equal(x$type, c("export", "callable"))
+  expect_equal(x$attribute, c("export", "callable"))
 
   args <- list(
     list(name = NA_character_, type = "call"),
@@ -116,10 +116,10 @@ test_that("can parse multiple functions with multiple attributes", {
     }
   ")
 
-  x <- locate_and_parse_attributes(code)
+  x <- parse_attributes(code)
 
   expect_equal(x$loc, c(2, 2, 7))
-  expect_equal(x$type, c("export", "callable", "export"))
+  expect_equal(x$attribute, c("export", "callable", "export"))
 
   args <- list(
     list(name = "nm", type = "call"),
@@ -133,14 +133,14 @@ test_that("can parse multiple functions with multiple attributes", {
 test_that("can parse an `init` attribute", {
   code <- to_lines("
     // [[ init() ]]
-    SEXP fn(SEXP x) {
-      return x;
+    void fn(DllInfo dll) {
+      return;
     }
   ")
 
-  x <- locate_and_parse_attributes(code)
+  x <- parse_attributes(code)
 
-  expect <- new_attribute_df(loc = 2, type = "init", args = list(list()))
+  expect <- new_attribute_df(loc = 2, attribute = "init", args = list(list()))
 
   expect_equal(x, expect)
 })
@@ -157,10 +157,10 @@ test_that("can generally ignore non-standard spacing", {
     }
   ")
 
-  x <- locate_and_parse_attributes(code)
+  x <- parse_attributes(code)
 
   expect_equal(x$loc, c(3, 3))
-  expect_equal(x$type, c("export", "callable"))
+  expect_equal(x$attribute, c("export", "callable"))
 
   args <- list(
     list(name = "fn2", type = "external"),
@@ -182,7 +182,7 @@ test_that("error if valid function, but not called with parenthesis", {
   ")
 
   expect_error(
-    locate_and_parse_attributes(code),
+    parse_attributes(code),
     "like `export[(][)]`, not `export`"
   )
 })
@@ -196,7 +196,7 @@ test_that("error if invalid function", {
   ")
 
   expect_error(
-    locate_and_parse_attributes(code),
+    parse_attributes(code),
     'could not find function "stuff"'
   )
 })
@@ -210,7 +210,7 @@ test_that("error if invalid function arguments", {
   ")
 
   expect_error(
-    locate_and_parse_attributes(code),
+    parse_attributes(code),
     'unused argument [(]names = "fn"[)]'
   )
 })

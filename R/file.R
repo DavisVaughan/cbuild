@@ -46,7 +46,7 @@ source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
 
   lines <- read_lines(file)
 
-  info <- parse_exports(lines)
+  info <- parse_export_attributes_and_signatures(lines)
 
   lines <- replace_function_names(lines, info)
 

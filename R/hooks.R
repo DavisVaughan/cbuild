@@ -10,7 +10,7 @@ hook_export <- function(name = NA_character_, type = "call") {
     type = type
   )
 
-  new_argument_df(type = "export", args = list(args))
+  new_argument_df(attribute = "export", args = list(args))
 }
 
 hook_callable <- function(name = NA_character_, hidden = FALSE) {
@@ -30,12 +30,12 @@ hook_callable <- function(name = NA_character_, hidden = FALSE) {
     hidden = hidden
   )
 
-  new_argument_df(type = "callable", args = list(args))
+  new_argument_df(attribute = "callable", args = list(args))
 }
 
 hook_init <- function() {
   args <- list()
-  new_argument_df(type = "init", args = list(args))
+  new_argument_df(attribute = "init", args = list(args))
 }
 
 class_collapse <- function(x) {

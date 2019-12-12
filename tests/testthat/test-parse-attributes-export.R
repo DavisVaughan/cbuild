@@ -7,7 +7,7 @@ test_that("can parse signatures over two lines", {
     }
   ")
 
-  x <- parse_exports(code)
+  x <- parse_export_attributes_and_signatures(code)
   expect_equal(x[[1]]$args, c("x", "y"))
 })
 
@@ -21,7 +21,7 @@ test_that("can parse signatures over three lines", {
     }
   ")
 
-  x <- parse_exports(code)
+  x <- parse_export_attributes_and_signatures(code)
   expect_equal(x[[1]]$args, c("x", "y", "z"))
 })
 
@@ -36,6 +36,6 @@ test_that("can parse signatures when the closing parenthesis is on its own line"
     }
   ")
 
-  x <- parse_exports(code)
+  x <- parse_export_attributes_and_signatures(code)
   expect_equal(x[[1]]$args, c("x", "y", "z"))
 })

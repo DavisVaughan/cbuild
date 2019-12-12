@@ -20,26 +20,28 @@ write_lines <- function(file, lines) {
   invisible(file)
 }
 
-new_attribute_df <- function(loc = integer(), type = character(), args = list()) {
-  data_frame(loc = loc, type = type, args = args)
+new_attribute_df <- function(loc = integer(), attribute = character(), args = list()) {
+  data_frame(loc = loc, attribute = attribute, args = args)
 }
 
-new_argument_df <- function(type = character(), args = list()) {
-  data_frame(type = type, args = args)
+new_argument_df <- function(attribute = character(), args = list()) {
+  data_frame(attribute = attribute, args = args)
 }
 
-data_frame <- function(...) {
-  x <- list(...)
+new_data_frame <- function(x = list(), n = NULL) {
+  is_empty <- length(x) == 0L
 
-  size <- length(x) == 0L
-
-  if (size) {
-    n <- 0L
-  } else {
-    n <- length(x[[1L]])
+  if (is.null(n)) {
+    if (is_empty) {
+      n <- 0L
+    } else {
+      n <- length(x[[1L]])
+    }
   }
 
-  if (size) {
+  n <- as.integer(n)
+
+  if (is_empty) {
     names(x) <- character()
   }
 
@@ -52,6 +54,11 @@ data_frame <- function(...) {
   attributes(x) <- new_attributes
 
   x
+}
+
+data_frame <- function(...) {
+  x <- list(...)
+  new_data_frame(x)
 }
 
 abort <- function(...) {

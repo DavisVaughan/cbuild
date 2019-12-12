@@ -1,4 +1,4 @@
-locate_and_parse_attributes <- function(lines) {
+parse_attributes <- function(lines) {
   lines <- trimws(lines, "both")
 
   # Line numbers are tracked as we locate attributes

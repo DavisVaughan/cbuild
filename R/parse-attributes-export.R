@@ -1,30 +1,41 @@
 # Used for `source_*()` functions, which just care about `export` attributes
-locate_and_parse_export_attributes <- function(lines) {
-  attribute_df <- locate_and_parse_attributes(lines)
+parse_export_attributes <- function(lines) {
+  attribute_df <- parse_attributes(lines)
 
-  attribute_df <- attribute_df[attribute_df$type == "export", , drop = FALSE]
+  attribute_df <- attribute_df[attribute_df$attribute == "export", , drop = FALSE]
 
   if (nrow(attribute_df) == 0L) {
     return(attribute_df)
   }
 
-  lst_of_one_row_arg_dfs <- map(attribute_df$args, as.data.frame, stringsAsFactors = FALSE)
-  arg_df <- do.call(rbind, lst_of_one_row_arg_dfs)
-
-  attribute_df$args <- NULL
-
-  exports_df <- cbind(attribute_df, arg_df)
-
-  exports_df
+  unnest_args(attribute_df)
 }
 
-parse_exports <- function(lines) {
+unnest_args <- function(attributes) {
+  lst_of_one_row_arg_dfs <- map(
+    attributes$args,
+    as.data.frame,
+    stringsAsFactors = FALSE
+  )
+
+  arg_df <- do.call(rbind, lst_of_one_row_arg_dfs)
+
+  attributes$args <- NULL
+
+  if (nrow(arg_df) == 0L) {
+    attributes
+  } else {
+    cbind(attributes, arg_df)
+  }
+}
+
+parse_export_attributes_and_signatures <- function(lines) {
   n_lines <- length(lines)
 
   # Whitespace just causes issues
   lines <- trimws(lines, "both")
 
-  attributes <- locate_and_parse_export_attributes(lines)
+  attributes <- parse_export_attributes(lines)
   locs <- attributes$loc
   names <- attributes$name
 
