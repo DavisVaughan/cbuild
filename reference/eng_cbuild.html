@@ -50,8 +50,8 @@ SEXP fn(SEXP x) {
 
 The engine is powered by source_code().
 By default, the engine will assign any functions that have been marked
-with // [[ export() ]] into the global environment, but this can be
-controlled with the knitr option, cbuild.env, see below." />
+with // [[ export() ]] into the knitr::knit_global() environment, but
+this can be controlled with the knitr option, cbuild.env, see below." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -140,8 +140,8 @@ SEXP fn(SEXP x) {
 
 <p>The engine is powered by <code><a href='source_code.html'>source_code()</a></code>.</p>
 <p>By default, the engine will assign any functions that have been marked
-with <code>// [[ export() ]]</code> into the global environment, but this can be
-controlled with the knitr option, <code>cbuild.env</code>, see below.</p>
+with <code>// [[ export() ]]</code> into the <code><a href='https://rdrr.io/pkg/knitr/man/knit_global.html'>knitr::knit_global()</a></code> environment, but
+this can be controlled with the knitr option, <code>cbuild.env</code>, see below.</p>
     </div>
 
     <pre class="usage"><span class='fu'>eng_cbuild</span>(<span class='no'>options</span>)</pre>
@@ -170,7 +170,8 @@ functions.</p>
 <li><p><code>cbuild.no_remap</code>: Passed on to the <code>no_remap</code> option of <code><a href='source_code.html'>source_code()</a></code>.</p></li>
 <li><p><code>cbuild.env</code>: A single character string specifying the name of a
 pre-existing environment object to create the functions in. If <code>cbuild.env</code>
-is left unset, the default is to assign in the global environment.</p></li>
+is left unset, the default is to assign in the <code><a href='https://rdrr.io/pkg/knitr/man/knit_global.html'>knitr::knit_global()</a></code>
+environment.</p></li>
 </ul>
 
 <p>This is an example of how you could customize all 3 options:</p>
