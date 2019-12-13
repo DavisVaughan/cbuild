@@ -633,7 +633,7 @@ can_write_init <- function(path_init) {
 
   made_by_cbuild <- identical(
     first_line,
-    init_do_not_modify()
+    do_not_modify()
   )
 
   if (made_by_cbuild) {
