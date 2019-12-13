@@ -1,3 +1,99 @@
+#' Write an `init.c` file
+#'
+#' @description
+#' `write_init()` generates a `src/init.c` file. It automates a number of tasks,
+#' such as:
+#'
+#' - Exporting C functions to the R side through the `.Call` and `.External`
+#'   mechanisms.
+#'
+#' - Registering C callables for use by other packages, and optionally
+#'   creating bindings for them in `inst/include/<pkg>/<pkg>.h` and
+#'   `inst/include/<pkg>/<pkg>.c`.
+#'
+#' `write_init()` determines the functions to include in the `init.c` file
+#' through the use of C comments placed directly above the function of
+#' interest and formatted like `// [[ export() ]] `. See the sections below
+#' for a complete description.
+#'
+#' @param path `[character(1)]`
+#'
+#'   The relative file path to the top level of your package.
+#'
+#' @section Export:
+#'
+#' Export a C function to the R side as a `CallRoutine`, suitable for use with
+#' `.Call()`.
+#'
+#' ```
+#' // [[ export(name = NA_character_) ]]
+#' ```
+#'
+#' - `name`: `[character(1)]`
+#'
+#'   A character string with no spaces in the name. Used to override
+#'   the name that is generated for the R routine object. The default uses
+#'   the name of the exported C function as the name for the R routine.
+#'
+#' @section Export External / External2:
+#'
+#' Export a C function to the R side as an `ExternalRoutine`, suitable for use
+#' with `.External()` or `.External2()`.
+#'
+#' ```
+#' // [[ export_external(n, name = NA_character_) ]]
+#' // [[ export_external2(n, name = NA_character_) ]]
+#' ```
+#'
+#' - `n`: `[integer(1)]`
+#'
+#'   The number of arguments expected when calling this routine _from the
+#'   R side_. Meaning that if you have a routine called `pkg_my_fun` that
+#'   you plan to call like `.External(pkg_my_fn, arg1, arg2)`, then you should
+#'   pass `n = 2`.
+#'
+#' - `name`: `[character(1)]`
+#'
+#'   A character string with no spaces in the name. Used to override
+#'   the name that is generated for the R routine object. The default uses
+#'   the name of the exported C function as the name for the R routine.
+#'
+#' @section Callable:
+#'
+#' Register a C function to be callable by other R packages.
+#'
+#' ```
+#' // [[ callable(name = NA_character_, hidden = FALSE) ]]
+#' ```
+#'
+#' - `name`: `[character(1)]`
+#'
+#'   A character string with no spaces in the name. Used to override
+#'   the name that is generated for the callable object. The default uses
+#'   the name of the exported C function as the name for the callable.
+#'
+#' - `hidden`: `[logical(1)]`
+#'
+#'   A logical. Should the registered callable also get an entry in the API
+#'   files created in `./inst/include/`? The default includes it in the API.
+#'   Flipping to `hidden = TRUE` registers the callable with
+#'   `R_RegisterCCallable()` but does not generate an API entry for it, meaning
+#'   that it can only be retrieved by another package's C code by using
+#'   `R_GetCCallable()`.
+#'
+#' @section Init:
+#'
+#' Sometimes you need to initialize extra objects at package load time. By
+#' marking a function with `init()`, it will get included at the end of the
+#' call to `R_init_<pkg>()`, which is called whenever the package is loaded.
+#' The function marked with `init()` should return `void` and take 1 argument,
+#' a `DllInfo*`, typically given the variable name `dll`.
+#'
+#' ```
+#' // [[ init() ]]
+#' ```
+#'
+#' @export
 write_init <- function(path = ".") {
   if (!has_src(path)) {
     abort(
