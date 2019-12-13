@@ -368,13 +368,14 @@ collect_attributes_and_signatures <- function(dir_src) {
   # TODO should it be recursive? rlang?
   path_src_files <- list.files(
     dir_src,
-    pattern = glob2rx("*.c"),
+    pattern = utils::glob2rx("*.c"),
     recursive = FALSE,
     full.names = TRUE
   )
 
   # Remove `init.c` file
-  path_src_files <- path_src_files[!grepl(glob2rx("*/init.c"), path_src_files)]
+  loc_init_c <- grepl(utils::glob2rx("*/init.c"), path_src_files)
+  path_src_files <- path_src_files[!loc_init_c]
 
   lst_of_attribute_df <- map(path_src_files, parse_attributes_and_signatures_in_file)
 
