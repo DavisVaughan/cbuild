@@ -115,7 +115,7 @@ write_init <- function(path = ".") {
 
   lines <- character()
 
-  lines <- write_init_do_not_modify(lines)
+  lines <- write_do_not_modify(lines)
   lines <- write_init_includes(lines)
   lines <- write_call_exports_and_entries(lines, info)
   lines <- write_external_exports_and_entries(lines, info)
@@ -596,8 +596,8 @@ new_line <- function() {
   "\n"
 }
 
-write_init_do_not_modify <- function(lines) {
-  c(lines, init_do_not_modify(), new_line(), new_line())
+write_do_not_modify <- function(lines) {
+  c(lines, do_not_modify(), new_line(), new_line())
 }
 
 create_new_init <- function(path_init) {
@@ -654,7 +654,7 @@ can_write_init <- function(path_init) {
   }
 }
 
-init_do_not_modify <- function() {
+do_not_modify <- function() {
   "// File generated automatically by cbuild - please do not modify by hand"
 }
 
