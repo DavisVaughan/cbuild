@@ -24,7 +24,7 @@ creating bindings for them in \code{inst/include/<pkg>/<pkg>.h} and
 
 \code{write_init()} determines the functions to include in the \code{init.c} file
 through the use of C comments placed directly above the function of
-interest and formatted like \code{// [[ export() ]] }. See the sections below
+interest and formatted like \code{// [[ export() ]]}. See the sections below
 for a complete description.
 }
 \section{Export}{

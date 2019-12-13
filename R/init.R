@@ -13,7 +13,7 @@
 #'
 #' `write_init()` determines the functions to include in the `init.c` file
 #' through the use of C comments placed directly above the function of
-#' interest and formatted like `// [[ export() ]] `. See the sections below
+#' interest and formatted like `// [[ export() ]]`. See the sections below
 #' for a complete description.
 #'
 #' @param path `[character(1)]`
