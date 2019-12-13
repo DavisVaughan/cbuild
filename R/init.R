@@ -280,8 +280,10 @@ write_external_entries <- function(lines, signatures, n) {
   names_export <- map_chr(signatures, function(x) x$name_export)
   names_export <- double_quote(names_export)
 
+  padding <- compute_padding(names_export)
+
   header <- "static const R_ExternalMethodDef ExtEntries[] = {"
-  entries <- paste0("  {", names_export, ", (DL_FUNC) &", names, ", ", n, "},")
+  entries <- paste0("  {", names_export, ",", padding, "(DL_FUNC) &", names, ", ", n, "},")
   ender <- "  {NULL, NULL, 0}"
   footer <- "};"
 
@@ -294,6 +296,21 @@ write_external_entries <- function(lines, signatures, n) {
   lines <- c(lines, new_line())
 
   lines
+}
+
+compute_padding <- function(x) {
+  chars <- nchar(x)
+  widest <- max(chars)
+
+  n_padding <- widest + 4L - chars
+
+  padding <- map_chr(n_padding, pad_dup)
+
+  padding
+}
+
+pad_dup <- function(times) {
+  paste0(rep(" ", times = times), collapse = "")
 }
 
 write_call_exports_and_entries <- function(lines, info) {
@@ -333,8 +350,10 @@ write_call_entries <- function(lines, signatures) {
   names_export <- double_quote(names_export)
   n_args <- map_int(signatures, function(x) x$n_args)
 
+  padding <- compute_padding(names_export)
+
   header <- "static const R_CallMethodDef CallEntries[] = {"
-  entries <- paste0("  {", names_export, ", (DL_FUNC) &", names, ", ", n_args, "},")
+  entries <- paste0("  {", names_export, ",", padding, "(DL_FUNC) &", names, ", ", n_args, "},")
   ender <- "  {NULL, NULL, 0}"
   footer <- "};"
 

@@ -14,10 +14,10 @@ extern SEXP test2_fn2(SEXP);
 
 // .Call entries
 static const R_CallMethodDef CallEntries[] = {
-  {"test1_fn1", (DL_FUNC) &test1_fn1, 1},
-  {"test1_fn2", (DL_FUNC) &test1_fn2, 1},
-  {"test2_fn1_override", (DL_FUNC) &test2_fn1, 1},
-  {"test2_fn2", (DL_FUNC) &test2_fn2, 1},
+  {"test1_fn1",             (DL_FUNC) &test1_fn1, 1},
+  {"test1_fn2",             (DL_FUNC) &test1_fn2, 1},
+  {"test2_fn1_override",    (DL_FUNC) &test2_fn1, 1},
+  {"test2_fn2",             (DL_FUNC) &test2_fn2, 1},
   {NULL, NULL, 0}
 };
 
@@ -26,7 +26,7 @@ extern SEXP test2_fn3(SEXP, SEXP, SEXP, SEXP);
 
 // .External entries
 static const R_ExternalMethodDef ExtEntries[] = {
-  {"test2_fn3", (DL_FUNC) &test2_fn3, 2},
+  {"test2_fn3",    (DL_FUNC) &test2_fn3, 2},
   {NULL, NULL, 0}
 };
 
