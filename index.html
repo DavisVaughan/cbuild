@@ -76,52 +76,58 @@
 
 <p>The goal of cbuild is to provide tools for working with C both interactively and when constructing an R package. The two broad goals are:</p>
 <ul>
-<li><p>Provide a way to interactively source C code into your R session.</p></li>
-<li><p>Provide an automatic registration system similar to <code>Rcpp::export</code> for package development.</p></li>
+<li><p>Provide a way to interactively source C code into your R session. See <code><a href="reference/source_function.html">source_function()</a></code> and <code><a href="reference/source_code.html">source_code()</a></code> to get started.</p></li>
+<li>
+<p>Provide an automatic registration system for R package developers that use C, see <code><a href="reference/write_init.html">write_init()</a></code>. It can automatically generate the <code>init.c</code> file for you, using a comment system similar to <code>Rcpp::export</code>. For example, the following would generate an entry for the C function <code>fn()</code> in <code>init.c</code>, and generate the glue code to export it as an R routine named <code>fn</code>, which you could call from the R side with <code><a href="https://rdrr.io/r/base/CallExternal.html">.Call(fn, 1)</a></code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="op">/</span><span class="er">/</span><span class="st"> </span>[[ <span class="kw">export</span>() ]]</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">SEXP <span class="kw">fn</span>(SEXP x) {</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">  return x;</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">}</a></code></pre></div>
+</li>
 </ul>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p>You can install the development version from <a href="https://github.com/">GitHub</a> with:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># install.packages("devtools")</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2">devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">"DavisVaughan/cbuild"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># install.packages("devtools")</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">"DavisVaughan/cbuild"</span>)</a></code></pre></div>
 </div>
 <div id="examples" class="section level2">
 <h2 class="hasAnchor">
 <a href="#examples" class="anchor"></a>Examples</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(cbuild)</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(cbuild)</a></code></pre></div>
 <p>The easiest way to get started is with <code><a href="reference/source_function.html">source_function()</a></code>, which allows you to source a C function from text. It automatically includes <code>R.h</code> and <code>Rinternals.h</code> for you to use.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">fn &lt;-<span class="st"> </span><span class="kw"><a href="reference/source_function.html">source_function</a></span>(<span class="st">"</span></a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="st">  SEXP fn(SEXP x) {</span></a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="st">    return x;</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="st">  }</span></a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="st">"</span>)</a>
-<a class="sourceLine" id="cb3-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="kw">fn</span>(<span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="co">#&gt; [1] 1</span></a></code></pre></div>
-<p>From there, you can use <code><a href="reference/source_code.html">source_code()</a></code> to source larger chunks of code. Tag functions that you want to export with <code>// [[ export() ]]</code>.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">fns &lt;-<span class="st"> </span><span class="kw"><a href="reference/source_code.html">source_code</a></span>(<span class="st">"</span></a>
-<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="st">  static SEXP helper(SEXP x) {</span></a>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">fn &lt;-<span class="st"> </span><span class="kw"><a href="reference/source_function.html">source_function</a></span>(<span class="st">"</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="st">  SEXP fn(SEXP x) {</span></a>
 <a class="sourceLine" id="cb4-3" data-line-number="3"><span class="st">    return x;</span></a>
 <a class="sourceLine" id="cb4-4" data-line-number="4"><span class="st">  }</span></a>
-<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="st">  </span></a>
-<a class="sourceLine" id="cb4-6" data-line-number="6"><span class="st">  // [[ export() ]]</span></a>
-<a class="sourceLine" id="cb4-7" data-line-number="7"><span class="st">  SEXP fn1(SEXP x) {</span></a>
-<a class="sourceLine" id="cb4-8" data-line-number="8"><span class="st">    return helper(x);</span></a>
-<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="st">  }</span></a>
-<a class="sourceLine" id="cb4-10" data-line-number="10"><span class="st">  </span></a>
-<a class="sourceLine" id="cb4-11" data-line-number="11"><span class="st">  // [[ export() ]]</span></a>
-<a class="sourceLine" id="cb4-12" data-line-number="12"><span class="st">  SEXP fn2(SEXP x, SEXP y) {</span></a>
-<a class="sourceLine" id="cb4-13" data-line-number="13"><span class="st">    double result = REAL(x)[0] + REAL(y)[0];</span></a>
-<a class="sourceLine" id="cb4-14" data-line-number="14"><span class="st">    return Rf_ScalarReal(result);</span></a>
-<a class="sourceLine" id="cb4-15" data-line-number="15"><span class="st">  }</span></a>
-<a class="sourceLine" id="cb4-16" data-line-number="16"><span class="st">"</span>)</a>
-<a class="sourceLine" id="cb4-17" data-line-number="17"></a>
-<a class="sourceLine" id="cb4-18" data-line-number="18">fns<span class="op">$</span><span class="kw">fn1</span>(<span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb4-19" data-line-number="19"><span class="co">#&gt; [1] 1</span></a>
-<a class="sourceLine" id="cb4-20" data-line-number="20"></a>
-<a class="sourceLine" id="cb4-21" data-line-number="21">fns<span class="op">$</span><span class="kw">fn2</span>(<span class="dv">1</span>, <span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb4-22" data-line-number="22"><span class="co">#&gt; [1] 3</span></a></code></pre></div>
+<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="st">"</span>)</a>
+<a class="sourceLine" id="cb4-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb4-7" data-line-number="7"><span class="kw">fn</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb4-8" data-line-number="8"><span class="co">#&gt; [1] 1</span></a></code></pre></div>
+<p>From there, you can use <code><a href="reference/source_code.html">source_code()</a></code> to source larger chunks of code. Tag functions that you want to export with <code>// [[ export() ]]</code>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">fns &lt;-<span class="st"> </span><span class="kw"><a href="reference/source_code.html">source_code</a></span>(<span class="st">"</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="st">  static SEXP helper(SEXP x) {</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="st">    return x;</span></a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="st">  }</span></a>
+<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="st">  </span></a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="st">  // [[ export() ]]</span></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="st">  SEXP fn1(SEXP x) {</span></a>
+<a class="sourceLine" id="cb5-8" data-line-number="8"><span class="st">    return helper(x);</span></a>
+<a class="sourceLine" id="cb5-9" data-line-number="9"><span class="st">  }</span></a>
+<a class="sourceLine" id="cb5-10" data-line-number="10"><span class="st">  </span></a>
+<a class="sourceLine" id="cb5-11" data-line-number="11"><span class="st">  // [[ export() ]]</span></a>
+<a class="sourceLine" id="cb5-12" data-line-number="12"><span class="st">  SEXP fn2(SEXP x, SEXP y) {</span></a>
+<a class="sourceLine" id="cb5-13" data-line-number="13"><span class="st">    double result = REAL(x)[0] + REAL(y)[0];</span></a>
+<a class="sourceLine" id="cb5-14" data-line-number="14"><span class="st">    return Rf_ScalarReal(result);</span></a>
+<a class="sourceLine" id="cb5-15" data-line-number="15"><span class="st">  }</span></a>
+<a class="sourceLine" id="cb5-16" data-line-number="16"><span class="st">"</span>)</a>
+<a class="sourceLine" id="cb5-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb5-18" data-line-number="18">fns<span class="op">$</span><span class="kw">fn1</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb5-19" data-line-number="19"><span class="co">#&gt; [1] 1</span></a>
+<a class="sourceLine" id="cb5-20" data-line-number="20"></a>
+<a class="sourceLine" id="cb5-21" data-line-number="21">fns<span class="op">$</span><span class="kw">fn2</span>(<span class="dv">1</span>, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb5-22" data-line-number="22"><span class="co">#&gt; [1] 3</span></a></code></pre></div>
 <p>If you have a full file to source, you can use <code><a href="reference/source_file.html">source_file()</a></code>.</p>
 </div>
 </div>
