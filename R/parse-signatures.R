@@ -84,7 +84,7 @@ parse_signatures_export_line <- function(loc, max_loc, name, lines) {
   signature <- collect_signature_arguments(signature, loc_signature, max_loc, lines)
 
   args <- split_by_comma(signature)
-  args <- parse_arguments(args)
+  args <- parse_arguments_exports(args)
 
   new_export_info(loc_signature, name_fn, name_export, args)
 }
@@ -162,7 +162,7 @@ parse_signatures_export_external_line <- function(loc, max_loc, name, lines) {
   signature <- collect_signature_arguments(signature, loc_signature, max_loc, lines)
 
   args <- split_by_comma(signature)
-  args <- parse_arguments(args)
+  args <- parse_arguments_exports(args)
 
   if (length(args) != 4L) {
     abort(
@@ -393,4 +393,40 @@ collect_signature_arguments <- function(signature, loc, max_loc, lines) {
   signature <- substr(signature, 1L, closing_parenthesis_loc - 1L)
 
   signature
+}
+
+parse_arguments <- function(args) {
+  args <- trimws(args, which = "both")
+
+  loc_space <- locate_text(" ", args)
+
+  if (any(is.na(loc_space))) {
+    abort("A valid argument has a space between the type and the argument name.")
+  }
+
+  args <- substr(args, loc_space + 1L, nchar(args))
+
+  # Rip off any pointers before the variable name
+  # Might be an arg like `int *varname`
+  has_pointer <- startsWith(args, "*")
+  args[has_pointer] <- substr(args[has_pointer], 2L, nchar(args))
+
+  args
+}
+
+parse_arguments_exports <- function(args) {
+  args <- trimws(args, which = "both")
+
+  # Does it start with `SEXP `?
+  if (any(!starts_with_SEXP(args))) {
+    stop("The exported function's arguments must all be `SEXP`s", call. = FALSE)
+  }
+
+  args <- substr(args, 6L, nchar(args))
+
+  if (any(grepl("\\s", args))) {
+    stop("The exported function's arguments cannot have any spaces in their names", call. = FALSE)
+  }
+
+  args
 }

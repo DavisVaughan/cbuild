@@ -138,31 +138,12 @@ parse_export_attributes_and_signatures <- function(lines) {
     signature <- substr(signature, 1L, closing_parenthesis_loc - 1L)
 
     args <- split_by_comma(signature)
-    args <- parse_arguments(args)
+    args <- parse_arguments_exports(args)
 
     out[[i]] <- new_function_info(loc, name, name_export, args)
   }
 
   out
-}
-
-# ------------------------------------------------------------------------------
-
-parse_arguments <- function(args) {
-  args <- trimws(args, which = "both")
-
-  # Does it start with `SEXP `?
-  if (any(!starts_with_SEXP(args))) {
-    stop("The exported function's arguments must all be `SEXP`s", call. = FALSE)
-  }
-
-  args <- substr(args, 6L, nchar(args))
-
-  if (any(grepl("\\s", args))) {
-    stop("The exported function's arguments cannot have any spaces in their names", call. = FALSE)
-  }
-
-  args
 }
 
 # ------------------------------------------------------------------------------
