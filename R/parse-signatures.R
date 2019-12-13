@@ -320,7 +320,7 @@ parse_signatures_init_line <- function(loc, max_loc, lines) {
   # Trim off `(`
   signature <- substr(signature, opening_parenthesis_loc + 1L, nchar(signature))
 
-  signature <- collect_signature_arguments(signature, loc_signature, max_loc, liness)
+  signature <- collect_signature_arguments(signature, loc_signature, max_loc, lines)
 
   args <- split_by_comma(signature)
 
