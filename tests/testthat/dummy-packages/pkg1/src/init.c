@@ -1,4 +1,4 @@
-//** File generated automatically by cbuild - please do not modify by hand
+// File generated automatically by cbuild - please do not modify by hand
 
 #include <R.h>
 #include <Rinternals.h>

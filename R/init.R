@@ -655,7 +655,7 @@ can_write_init <- function(path_init) {
 }
 
 init_do_not_modify <- function() {
-  "//** File generated automatically by cbuild - please do not modify by hand"
+  "// File generated automatically by cbuild - please do not modify by hand"
 }
 
 dir_package <- function(path) {
