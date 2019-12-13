@@ -21,6 +21,15 @@ static const R_CallMethodDef CallEntries[] = {
   {NULL, NULL, 0}
 };
 
+// .External declarations
+extern SEXP test2_fn3(SEXP, SEXP, SEXP, SEXP);
+
+// .External entries
+static const R_ExternalMethodDef ExtEntries[] = {
+  {“test2_fn3”, (DL_FUNC) &test2_fn3, 2},
+  {NULL, NULL, 0}
+};
+
 // Callable API declarations
 extern SEXP test1_fn3(SEXP);
 
@@ -28,7 +37,7 @@ extern SEXP test1_fn3(SEXP);
 extern SEXP test1_fn4(SEXP);
 
 void R_init_test(DllInfo *dll) {
-  R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+  R_registerRoutines(dll, NULL, CallEntries, NULL, ExtEntries);
   R_useDynamicSymbols(dll, FALSE);
 
   // Hidden callable API registrations
@@ -40,5 +49,6 @@ void R_init_test(DllInfo *dll) {
   R_RegisterCCallable(“test”, “test2_fn2_callable”, (DL_FUNC) &test2_fn2);
 
   test1_fn5(dll);
+  test1_fn6(dll);
 }
 

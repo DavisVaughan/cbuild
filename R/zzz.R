@@ -32,6 +32,7 @@ cbuild__hook_env <- NULL
 
   # Load hooks
   assign("export", ns$hook_export, envir = cbuild__hook_env)
+  assign("export_external", ns$hook_export_external, envir = cbuild__hook_env)
   assign("callable", ns$hook_callable, envir = cbuild__hook_env)
   assign("init", ns$hook_init, envir = cbuild__hook_env)
 }

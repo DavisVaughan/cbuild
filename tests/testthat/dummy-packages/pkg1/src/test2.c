@@ -8,3 +8,8 @@ SEXP test2_fn1(SEXP x) {
 SEXP test2_fn2(SEXP y) {
   return y;
 }
+
+// [[ export_external(n = 2) ]]
+SEXP test2_fn3(SEXP call, SEXP op, SEXP args, SEXP env) {
+  return y;
+}

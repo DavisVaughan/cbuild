@@ -22,3 +22,8 @@ SEXP test1_fn4(SEXP y) {
 void test1_fn5(DllInfo dll) {
   return;
 }
+
+// [[ init() ]]
+void test1_fn6(DllInfo dll) {
+  return;
+}

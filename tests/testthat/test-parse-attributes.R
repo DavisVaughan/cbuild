@@ -12,12 +12,7 @@ test_that("correct behavior with no attributes", {
 })
 
 test_that("ignored if no opening brackets", {
-  code <- to_lines("
-    // export() ]]
-    SEXP fn(SEXP x) {
-      return x;
-    }
-  ")
+  code <- "// export() ]]"
 
   x <- parse_attributes(code)
 
@@ -25,12 +20,7 @@ test_that("ignored if no opening brackets", {
 })
 
 test_that("ignored if no closing brackets", {
-  code <- to_lines("
-    // [[ export()
-    SEXP fn(SEXP x) {
-      return x;
-    }
-  ")
+  code <- "// [[ export()"
 
   x <- parse_attributes(code)
 
@@ -38,65 +28,45 @@ test_that("ignored if no closing brackets", {
 })
 
 test_that("can parse a single attribute", {
-  code <- to_lines("
-    // [[ export() ]]
-    SEXP fn(SEXP x) {
-      return x;
-    }
-  ")
+  code <- "// [[ export() ]]"
 
   x <- parse_attributes(code)
 
-  expect_equal(x$loc, 2)
+  expect_equal(x$loc, 1)
   expect_equal(x$attribute, "export")
 
-  args <- list(list(name = NA_character_, type = "call"))
+  args <- list(list(name = NA_character_))
   expect_equal(x$args, args)
 })
 
 test_that("can parse an attribute with an argument", {
-  code <- to_lines("
-    // [[ export(name = 'fancy_fn') ]]
-    SEXP fn(SEXP x) {
-      return x;
-    }
-  ")
+  code <- "// [[ export(name = 'fancy_fn') ]]"
 
   x <- parse_attributes(code)
 
-  args <- list(list(name = "fancy_fn", type = "call"))
+  args <- list(list(name = "fancy_fn"))
   expect_equal(x$args, args)
 })
 
 test_that("can parse an attribute with two arguments", {
-  code <- to_lines("
-    // [[ export(name = 'fancy_fn', type = 'external') ]]
-    SEXP fn(SEXP x) {
-      return x;
-    }
-  ")
+  code <- "// [[ export_external(name = 'fancy_fn', n = 1) ]]"
 
   x <- parse_attributes(code)
 
-  args <- list(list(name = "fancy_fn", type = "external"))
+  args <- list(list(name = "fancy_fn", n = 1L))
   expect_equal(x$args, args)
 })
 
 test_that("can parse two attributes", {
-  code <- to_lines("
-    // [[ export(); callable() ]]
-    SEXP fn(SEXP x) {
-      return x;
-    }
-  ")
+  code <- "// [[ export(); callable() ]]"
 
   x <- parse_attributes(code)
 
-  expect_equal(x$loc, c(2, 2))
+  expect_equal(x$loc, c(1, 1))
   expect_equal(x$attribute, c("export", "callable"))
 
   args <- list(
-    list(name = NA_character_, type = "call"),
+    list(name = NA_character_),
     list(name = NA_character_, hidden = FALSE)
   )
 
@@ -105,7 +75,7 @@ test_that("can parse two attributes", {
 
 test_that("can parse multiple functions with multiple attributes", {
   code <- to_lines("
-    // [[ export(name = 'nm', type = 'call'); callable() ]]
+    // [[ export(name = 'nm'); callable() ]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -122,9 +92,9 @@ test_that("can parse multiple functions with multiple attributes", {
   expect_equal(x$attribute, c("export", "callable", "export"))
 
   args <- list(
-    list(name = "nm", type = "call"),
+    list(name = "nm"),
     list(name = NA_character_, hidden = FALSE),
-    list(name = "nm2", type = "call")
+    list(name = "nm2")
   )
 
   expect_equal(x$args, args)
@@ -151,7 +121,7 @@ test_that("can parse an `init` attribute", {
 test_that("can generally ignore non-standard spacing", {
   code <- to_lines("
 
-    //[[export(name ='fn2', type= 'external');   callable()]]
+    //[[export_external(n = 2,name ='fn2');   callable()]]
     SEXP fn(SEXP x) {
       return x;
     }
@@ -160,10 +130,10 @@ test_that("can generally ignore non-standard spacing", {
   x <- parse_attributes(code)
 
   expect_equal(x$loc, c(3, 3))
-  expect_equal(x$attribute, c("export", "callable"))
+  expect_equal(x$attribute, c("export_external", "callable"))
 
   args <- list(
-    list(name = "fn2", type = "external"),
+    list(name = "fn2", n = 2L),
     list(name = NA_character_, hidden = FALSE)
   )
 

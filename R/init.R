@@ -1,6 +1,9 @@
 write_init <- function(path = ".") {
   if (!has_src(path)) {
-    abort("`path` must be an R package with a `src` folder to write the `init.c` file in.")
+    abort(
+      "`path` must point to an R package with a `src` folder to ",
+      "write the `init.c` file in."
+    )
   }
 
   dir_src <- dir_src(path)
@@ -32,25 +35,23 @@ write_init <- function(path = ".") {
 }
 
 has_exports <- function(info, type) {
-  info <- info[info$attribute == "export",]
+  info <- info[info$attribute == type,]
 
   if (nrow(info) == 0L) {
-    return(FALSE)
+    FALSE
+  } else {
+    TRUE
   }
-
-  is_type <- map_lgl(info$args, function(x) x$type == type)
-
-  any(is_type)
 }
 
 write_r_init_pkg <- function(lines, info, pkg) {
-  if (has_exports(info, "call")) {
+  if (has_exports(info, "export")) {
     call_entries  <- "CallEntries"
   } else {
     call_entries <- "NULL"
   }
 
-  if (has_exports(info, "external")) {
+  if (has_exports(info, "export_external")) {
     external_entries <- "ExtEntries"
   } else {
     external_entries <- "NULL"
@@ -159,7 +160,8 @@ package_name <- function(path) {
 }
 
 remove_exports <- function(callable, info) {
-  exports <- info[info$attribute == "export",]
+  loc_all_exports <- info$attribute == "export" | info$attribute == "export_external"
+  exports <- info[loc_all_exports,]
 
   if (nrow(exports) == 0L) {
     return(callable)
@@ -221,18 +223,18 @@ write_callables <- function(lines, info, hidden) {
 }
 
 write_external_exports_and_entries <- function(lines, info) {
-  info <- info[info$attribute == "export",]
+  info <- info[info$attribute == "export_external",]
   info <- unnest_args(info)
-  info <- info[info$type == "external",]
 
   if (nrow(info) == 0L) {
     return(lines)
   }
 
+  n <- info$n
   signatures <- info$signature
 
   lines <- write_external_exports(lines, signatures)
-  lines <- write_external_entries(lines, signatures)
+  lines <- write_external_entries(lines, signatures, n)
 
   lines
 }
@@ -240,7 +242,8 @@ write_external_exports_and_entries <- function(lines, info) {
 write_external_exports <- function(lines, signatures) {
   names <- map_chr(signatures, function(x) x$name)
 
-  n_args <- map_int(signatures, function(x) x$n_args)
+  # This should always be 4 for .External2 calls
+  n_args <- rep(4L, length(signatures))
   sexp_arg_list <- map_chr(n_args, make_sexp_arg_list)
 
   declarations <- paste0("extern SEXP ", names, "(", sexp_arg_list, ");")
@@ -252,14 +255,13 @@ write_external_exports <- function(lines, signatures) {
   lines
 }
 
-write_external_entries <- function(lines, signatures) {
+write_external_entries <- function(lines, signatures, n) {
   names <- map_chr(signatures, function(x) x$name)
   names_export <- map_chr(signatures, function(x) x$name_export)
   names_export <- dQuote(names_export)
-  n_args <- map_int(signatures, function(x) x$n_args)
 
   header <- "static const R_ExternalMethodDef ExtEntries[] = {"
-  entries <- paste0("  {", names_export, ", (DL_FUNC) &", names, ", ", n_args, "},")
+  entries <- paste0("  {", names_export, ", (DL_FUNC) &", names, ", ", n, "},")
   ender <- "  {NULL, NULL, 0}"
   footer <- "};"
 
@@ -277,7 +279,6 @@ write_external_entries <- function(lines, signatures) {
 write_call_exports_and_entries <- function(lines, info) {
   info <- info[info$attribute == "export",]
   info <- unnest_args(info)
-  info <- info[info$type == "call",]
 
   if (nrow(info) == 0L) {
     return(lines)

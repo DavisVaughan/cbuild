@@ -1,16 +1,43 @@
-hook_export <- function(name = NA_character_, type = "call") {
+hook_export <- function(name = NA_character_) {
   validate_name(name)
 
-  if (!identical(type, "call") && !identical(type, "external")) {
-    abort("`type` must be either 'call' or 'external'.")
+  args <- list(
+    name = name
+  )
+
+  new_argument_df(attribute = "export", args = list(args))
+}
+
+hook_export_external <- function(n, name = NA_character_) {
+  validate_name(name)
+
+  if (missing(n)) {
+    abort(
+      ".External functions require the `n` argument. ",
+      "Like: `// [[ export_external(n = _) ]]`."
+    )
+  }
+
+  if (length(n) != 1L) {
+    abort("`n` must be size 1.")
+  }
+
+  if (!is.numeric(n)) {
+    abort("`n` must be an integer value.")
+  }
+
+  n <- as.integer(n)
+
+  if (isTRUE(n <= 0)) {
+    abort("`n` must be greater than or equal to `0`.")
   }
 
   args <- list(
     name = name,
-    type = type
+    n = n
   )
 
-  new_argument_df(attribute = "export", args = list(args))
+  new_argument_df(attribute = "export_external", args = list(args))
 }
 
 hook_callable <- function(name = NA_character_, hidden = FALSE) {
