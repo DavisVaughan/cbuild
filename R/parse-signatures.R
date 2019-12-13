@@ -81,7 +81,7 @@ parse_signatures_export_line <- function(loc, max_loc, name, lines) {
   # Trim off `(`
   signature <- substr(signature, opening_parenthesis_loc + 1L, nchar(signature))
 
-  signature <- collect_signature_arguments(signature, loc_signature, max_loc)
+  signature <- collect_signature_arguments(signature, loc_signature, max_loc, lines)
 
   args <- split_by_comma(signature)
   args <- parse_arguments(args)
@@ -159,7 +159,7 @@ parse_signatures_export_external_line <- function(loc, max_loc, name, lines) {
   # Trim off `(`
   signature <- substr(signature, opening_parenthesis_loc + 1L, nchar(signature))
 
-  signature <- collect_signature_arguments(signature, loc_signature, max_loc)
+  signature <- collect_signature_arguments(signature, loc_signature, max_loc, lines)
 
   args <- split_by_comma(signature)
   args <- parse_arguments(args)
@@ -246,7 +246,7 @@ parse_signatures_callable_line <- function(loc, max_loc, name, lines) {
   # Trim off `(`
   signature <- substr(signature, opening_parenthesis_loc + 1L, nchar(signature))
 
-  signature <- collect_signature_arguments(signature, loc_signature, max_loc)
+  signature <- collect_signature_arguments(signature, loc_signature, max_loc, lines)
 
   args <- split_by_comma(signature)
   args <- parse_arguments(args)
@@ -320,7 +320,7 @@ parse_signatures_init_line <- function(loc, max_loc, lines) {
   # Trim off `(`
   signature <- substr(signature, opening_parenthesis_loc + 1L, nchar(signature))
 
-  signature <- collect_signature_arguments(signature, loc_signature, max_loc)
+  signature <- collect_signature_arguments(signature, loc_signature, max_loc, liness)
 
   args <- split_by_comma(signature)
 
@@ -365,7 +365,7 @@ locate_signature_start <- function(loc, max_loc, lines) {
   loc
 }
 
-collect_signature_arguments <- function(signature, loc, max_loc) {
+collect_signature_arguments <- function(signature, loc, max_loc, lines) {
   # Locate `)`
   closing_parenthesis_loc <- locate_closing_parenthesis(signature)
 
