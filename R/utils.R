@@ -78,3 +78,7 @@ abort_problem_parsing <- function(what, problem) {
 grepl_fixed <- function(x, pattern) {
   grepl(pattern, x, fixed = TRUE)
 }
+
+double_quote <- function(x) {
+  encodeString(x, quote = "\"", na.encode = FALSE)
+}

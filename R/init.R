@@ -142,9 +142,9 @@ write_register_callables <- function(lines, info, pkg, hidden) {
 
   registrations <- paste0(
     "  R_RegisterCCallable(",
-    dQuote(pkg),
+    double_quote(pkg),
     ", ",
-    dQuote(name_callable),
+    double_quote(name_callable),
     ", (DL_FUNC) &",
     names,
     ");"
@@ -278,7 +278,7 @@ write_external_exports <- function(lines, signatures) {
 write_external_entries <- function(lines, signatures, n) {
   names <- map_chr(signatures, function(x) x$name)
   names_export <- map_chr(signatures, function(x) x$name_export)
-  names_export <- dQuote(names_export)
+  names_export <- double_quote(names_export)
 
   header <- "static const R_ExternalMethodDef ExtEntries[] = {"
   entries <- paste0("  {", names_export, ", (DL_FUNC) &", names, ", ", n, "},")
@@ -330,7 +330,7 @@ write_call_exports <- function(lines, signatures) {
 write_call_entries <- function(lines, signatures) {
   names <- map_chr(signatures, function(x) x$name)
   names_export <- map_chr(signatures, function(x) x$name_export)
-  names_export <- dQuote(names_export)
+  names_export <- double_quote(names_export)
   n_args <- map_int(signatures, function(x) x$n_args)
 
   header <- "static const R_CallMethodDef CallEntries[] = {"
