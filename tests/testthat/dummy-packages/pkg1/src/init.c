@@ -22,11 +22,15 @@ static const R_CallMethodDef CallEntries[] = {
 };
 
 // .External declarations
+extern SEXP test2_fn4(SEXP);
+
+// .External2 declarations
 extern SEXP test2_fn3(SEXP, SEXP, SEXP, SEXP);
 
-// .External entries
+// .External / .External2 entries
 static const R_ExternalMethodDef ExtEntries[] = {
   {"test2_fn3", (DL_FUNC) &test2_fn3, 2},
+  {"test2_fn4", (DL_FUNC) &test2_fn4, 2},
   {NULL, NULL, 0}
 };
 

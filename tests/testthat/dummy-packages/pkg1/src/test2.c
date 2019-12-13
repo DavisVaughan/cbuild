@@ -9,7 +9,12 @@ SEXP test2_fn2(SEXP y) {
   return y;
 }
 
-// [[ export_external(n = 2) ]]
+// [[ export_external2(n = 2) ]]
 SEXP test2_fn3(SEXP call, SEXP op, SEXP args, SEXP env) {
+  return y;
+}
+
+// [[ export_external(n = 2) ]]
+SEXP test2_fn4(SEXP args) {
   return y;
 }

@@ -3,11 +3,13 @@ parse_signatures <- function(attributes, lines) {
 
   rows_export <- which(attribute_types == "export")
   rows_export_external <- which(attribute_types == "export_external")
+  rows_export_external2 <- which(attribute_types == "export_external2")
   rows_callable <- which(attribute_types == "callable")
   rows_init <- which(attribute_types == "init")
 
   attributes_export <- attributes[rows_export,]
   attributes_export_external <- attributes[rows_export_external,]
+  attributes_export_external2 <- attributes[rows_export_external2,]
   attributes_callable <- attributes[rows_callable,]
   attributes_init <- attributes[rows_init,]
 
@@ -15,6 +17,7 @@ parse_signatures <- function(attributes, lines) {
 
   signature[rows_export] <- parse_signatures_export(attributes_export, lines)
   signature[rows_export_external] <- parse_signatures_export_external(attributes_export_external, lines)
+  signature[rows_export_external2] <- parse_signatures_export_external2(attributes_export_external2, lines)
   signature[rows_callable] <- parse_signatures_callable(attributes_callable, lines)
   signature[rows_init] <- parse_signatures_init(attributes_init, lines)
 
@@ -103,7 +106,7 @@ new_export_info <- function(loc, name, name_export, args) {
 
 # ------------------------------------------------------------------------------
 
-parse_signatures_export_external <- function(attributes, lines) {
+parse_signatures_export_external2 <- function(attributes, lines) {
   if (nrow(attributes) == 0L) {
     return(list())
   }
@@ -121,12 +124,12 @@ parse_signatures_export_external <- function(attributes, lines) {
 
   pmap(
     list(locs, max_locs, names),
-    parse_signatures_export_external_line,
+    parse_signatures_export_external2_line,
     lines = lines
   )
 }
 
-parse_signatures_export_external_line <- function(loc, max_loc, name, lines) {
+parse_signatures_export_external2_line <- function(loc, max_loc, name, lines) {
   n_lines <- length(lines)
 
   loc_signature <- locate_signature_start(loc, max_loc, lines)
@@ -134,7 +137,7 @@ parse_signatures_export_external_line <- function(loc, max_loc, name, lines) {
 
   # Does it start with `SEXP `?
   if (!starts_with_SEXP(signature)) {
-    stop("The exported external function must have a return value of `SEXP`", call. = FALSE)
+    stop("The exported .External2 function must have a return value of `SEXP`", call. = FALSE)
   }
 
   signature <- substr(signature, 6L, nchar(signature))
@@ -166,9 +169,90 @@ parse_signatures_export_external_line <- function(loc, max_loc, name, lines) {
 
   if (length(args) != 4L) {
     abort(
-      ".External functions must have 4 arguments, ",
+      ".External2 functions must have 4 arguments, ",
       "preferably named: ",
       "`call`, `op`, `args`, `env`."
+    )
+  }
+
+  new_export_external2_info(loc_signature, name_fn, name_export)
+}
+
+new_export_external2_info <- function(loc, name, name_export) {
+  list(
+    name = name,
+    name_export = name_export,
+    loc = loc
+  )
+}
+
+# ------------------------------------------------------------------------------
+
+parse_signatures_export_external <- function(attributes, lines) {
+  if (nrow(attributes) == 0L) {
+    return(list())
+  }
+
+  n_lines <- length(lines)
+
+  attributes <- unnest_args(attributes)
+
+  locs <- attributes$loc
+  max_locs <- c(locs[-length(locs)], n_lines)
+  names <- attributes$name
+
+  # White space just causes problems at this point
+  lines <- trimws(lines, "both")
+
+  pmap(
+    list(locs, max_locs, names),
+    parse_signatures_export_external_line,
+    lines = lines
+  )
+}
+
+parse_signatures_export_external_line <- function(loc, max_loc, name, lines) {
+  n_lines <- length(lines)
+
+  loc_signature <- locate_signature_start(loc, max_loc, lines)
+  signature <- lines[[loc_signature]]
+
+  # Does it start with `SEXP `?
+  if (!starts_with_SEXP(signature)) {
+    stop("The exported .External function must have a return value of `SEXP`", call. = FALSE)
+  }
+
+  signature <- substr(signature, 6L, nchar(signature))
+
+  # Locate `(`
+  opening_parenthesis_loc <- locate_opening_parenthesis(signature)
+
+  if (is.na(opening_parenthesis_loc)) {
+    stop("Cannot find opening parenthesis.", call. = FALSE)
+  }
+
+  name_fn <- substr(signature, 1L, opening_parenthesis_loc - 1L)
+  name_fn <- trimws(name_fn, which = "right")
+
+  # Attribute name override with `export_external(name = value)`
+  if (is.na(name)) {
+    name_export <- name_fn
+  } else {
+    name_export <- name
+  }
+
+  # Trim off `(`
+  signature <- substr(signature, opening_parenthesis_loc + 1L, nchar(signature))
+
+  signature <- collect_signature_arguments(signature, loc_signature, max_loc, lines)
+
+  args <- split_by_comma(signature)
+  args <- parse_arguments_exports(args)
+
+  if (length(args) != 1L) {
+    abort(
+      ".External functions must have 1 argument, ",
+      "preferably named `args`."
     )
   }
 

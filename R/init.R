@@ -245,57 +245,89 @@ write_callables <- function(lines, info, hidden) {
 }
 
 write_external_exports_and_entries <- function(lines, info) {
-  info <- info[info$attribute == "export_external",]
-  info <- unnest_args(info)
+  lines <- write_external_exports(lines, info, two = FALSE)
+  lines <- write_external_exports(lines, info, two = TRUE)
+  lines <- write_external_entries(lines, info)
+  lines
+}
+
+write_external_exports <- function(lines, info, two = FALSE) {
+  if (two) {
+    type <- "export_external2"
+    n_sexps <- 4L
+    comment <- "// .External2 declarations"
+  } else {
+    type <- "export_external"
+    n_sexps <- 1L
+    comment <- "// .External declarations"
+  }
+
+  info <- info[info$attribute == type,]
 
   if (nrow(info) == 0L) {
     return(lines)
   }
 
-  n <- info$n
+  info <- unnest_args(info)
+
   signatures <- info$signature
 
-  lines <- write_external_exports(lines, signatures)
-  lines <- write_external_entries(lines, signatures, n)
-
-  lines
-}
-
-write_external_exports <- function(lines, signatures) {
   names <- map_chr(signatures, function(x) x$name)
 
-  # This should always be 4 for .External2 calls
-  n_args <- rep(4L, length(signatures))
+  n_args <- rep(n_sexps, length(signatures))
   sexp_arg_list <- map_chr(n_args, make_sexp_arg_list)
 
   declarations <- paste0("extern SEXP ", names, "(", sexp_arg_list, ");")
 
-  lines <- add_lines(lines, "// .External declarations")
+  lines <- add_lines(lines, comment)
   lines <- add_lines(lines, declarations)
   lines <- c(lines, new_line())
 
   lines
 }
 
-write_external_entries <- function(lines, signatures, n) {
+write_external_entries <- function(lines, info) {
+  all_external <- info$attribute == "export_external" | info$attribute == "export_external2"
+
+  info <- info[all_external,]
+
+  if (nrow(info) == 0L) {
+    return(lines)
+  }
+
+  header <- "static const R_ExternalMethodDef ExtEntries[] = {"
+  ender <- "  {NULL, NULL, 0}"
+  footer <- "};"
+
+  lines <- add_lines(lines, "// .External / .External2 entries")
+  lines <- add_lines(lines, header)
+  lines <- add_external_entries(lines, info)
+  lines <- add_lines(lines, ender)
+  lines <- add_lines(lines, footer)
+  lines <- c(lines, new_line())
+
+  lines
+}
+
+add_external_entries <- function(lines, info) {
+  if (nrow(info) == 0L) {
+    return(lines)
+  }
+
+  info <- unnest_args(info)
+  signatures <- info$signature
+
   names <- map_chr(signatures, function(x) x$name)
   names_export <- map_chr(signatures, function(x) x$name_export)
   names_export <- double_quote(names_export)
 
+  n <- info$n
+
   padding <- compute_padding(names_export)
 
-  header <- "static const R_ExternalMethodDef ExtEntries[] = {"
   entries <- paste0("  {", names_export, ",", padding, "(DL_FUNC) &", names, ", ", n, "},")
-  ender <- "  {NULL, NULL, 0}"
-  footer <- "};"
 
-  lines <- add_lines(lines, "// .External entries")
-  lines <- add_lines(lines, header)
   lines <- add_lines(lines, entries)
-  lines <- add_lines(lines, ender)
-  lines <- add_lines(lines, footer)
-
-  lines <- c(lines, new_line())
 
   lines
 }

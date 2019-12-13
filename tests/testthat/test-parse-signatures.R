@@ -16,7 +16,7 @@ test_that("must have SEXP arguments", {
 # ------------------------------------------------------------------------------
 # export_external()
 
-test_that("must have 4 SEXP arguments", {
+test_that("must have 1 SEXP arguments", {
   code <- to_lines("
     // [[ export_external(n = 1) ]]
     SEXP fn(int w) {
@@ -29,6 +29,31 @@ test_that("must have 4 SEXP arguments", {
 
   code <- to_lines("
     // [[ export_external(n = 1) ]]
+    SEXP fn(SEXP w, SEXP z) {
+      return;
+    }
+  ")
+
+  attrs <- parse_attributes(code)
+  expect_error(parse_signatures(attrs, code), "must have 1 argument")
+})
+
+# ------------------------------------------------------------------------------
+# export_external2()
+
+test_that("must have 4 SEXP arguments", {
+  code <- to_lines("
+    // [[ export_external2(n = 1) ]]
+    SEXP fn(int w) {
+      return;
+    }
+  ")
+
+  attrs <- parse_attributes(code)
+  expect_error(parse_signatures(attrs, code), "must all be `SEXP`s")
+
+  code <- to_lines("
+    // [[ export_external2(n = 1) ]]
     SEXP fn(SEXP w) {
       return;
     }

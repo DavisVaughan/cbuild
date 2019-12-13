@@ -8,6 +8,26 @@ hook_export <- function(name = NA_character_) {
   new_argument_df(attribute = "export", args = list(args))
 }
 
+hook_export_external2 <- function(n, name = NA_character_) {
+  validate_name(name)
+
+  if (missing(n)) {
+    abort(
+      ".External2 functions require the `n` argument. ",
+      "Like: `// [[ export_external2(n = _) ]]`."
+    )
+  }
+
+  n <- validate_n(n)
+
+  args <- list(
+    name = name,
+    n = n
+  )
+
+  new_argument_df(attribute = "export_external2", args = list(args))
+}
+
 hook_export_external <- function(n, name = NA_character_) {
   validate_name(name)
 
@@ -18,19 +38,7 @@ hook_export_external <- function(n, name = NA_character_) {
     )
   }
 
-  if (length(n) != 1L) {
-    abort("`n` must be size 1.")
-  }
-
-  if (!is.numeric(n)) {
-    abort("`n` must be an integer value.")
-  }
-
-  n <- as.integer(n)
-
-  if (isTRUE(n <= 0)) {
-    abort("`n` must be greater than or equal to `0`.")
-  }
+  n <- validate_n(n)
 
   args <- list(
     name = name,
@@ -84,4 +92,22 @@ validate_name <- function(name) {
   }
 
   invisible(name)
+}
+
+validate_n <- function(n) {
+  if (length(n) != 1L) {
+    abort("`n` must be size 1.")
+  }
+
+  if (!is.numeric(n)) {
+    abort("`n` must be an integer value.")
+  }
+
+  n <- as.integer(n)
+
+  if (isTRUE(n <= 0)) {
+    abort("`n` must be greater than or equal to `0`.")
+  }
+
+  n
 }
