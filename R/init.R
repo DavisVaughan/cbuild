@@ -25,6 +25,7 @@ write_init <- function(path = ".") {
   lines <- write_external_exports_and_entries(lines, info)
   lines <- write_callables(lines, info, hidden = FALSE)
   lines <- write_callables(lines, info, hidden = TRUE)
+  lines <- write_init_hook_declarations(lines, info)
   lines <- write_r_init_pkg(lines, info, pkg)
 
   remove_preexiting_init(path_init)
@@ -32,6 +33,25 @@ write_init <- function(path = ".") {
   writeLines(lines, path_init, sep = "")
 
   invisible(path)
+}
+
+write_init_hook_declarations <- function(lines, info) {
+  info <- info[info$attribute == "init",]
+
+  if (nrow(info) == 0L) {
+    return(lines)
+  }
+
+  signatures <- info$signature
+
+  names <- map_chr(signatures, function(x) x$name)
+
+  init_functions <- paste0("void ", names, "(DllInfo* dll);")
+
+  lines <- add_lines(lines, "// Init hook declarations")
+  lines <- add_lines(lines, init_functions)
+  lines <- c(lines, new_line())
+  lines
 }
 
 has_exports <- function(info, type) {
