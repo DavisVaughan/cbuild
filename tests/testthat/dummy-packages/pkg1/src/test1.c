@@ -19,11 +19,11 @@ SEXP test1_fn4(SEXP y) {
 }
 
 // [[ init() ]]
-void test1_fn5(DllInfo dll) {
+void test1_fn5(DllInfo* dll) {
   return;
 }
 
 // [[ init() ]]
-void test1_fn6(DllInfo dll) {
+void test1_fn6(DllInfo* dll) {
   return;
 }

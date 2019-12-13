@@ -101,16 +101,11 @@ test_that("can parse multiple functions with multiple attributes", {
 })
 
 test_that("can parse an `init` attribute", {
-  code <- to_lines("
-    // [[ init() ]]
-    void fn(DllInfo dll) {
-      return;
-    }
-  ")
+  code <- "// [[ init() ]]"
 
   x <- parse_attributes(code)
 
-  expect <- new_attribute_df(loc = 2, attribute = "init", args = list(list()))
+  expect <- new_attribute_df(loc = 1, attribute = "init", args = list(list()))
 
   expect_equal(x, expect)
 })

@@ -325,16 +325,21 @@ parse_signatures_init_line <- function(loc, max_loc, lines) {
   args <- split_by_comma(signature)
 
   if (length(args) != 1L) {
-    abort("There can only be 1 argument for an init function, a `DllInfo`.")
+    abort("There can only be 1 argument for an init function, a `DllInfo*`.")
   }
 
-  loc_return_value_end <- locate_text(" ", args)
+  # Some people do `DllInfo *dll`, so remove all spaces and find the `*`
+  args <- sub(" ", "", args)
+  loc_dllinfo_endpoint <- locate_text("*", args)
 
-  args <- substr(args, 1L, loc_return_value_end - 1L)
-  args <- trimws(args, "both")
+  if (is.na(loc_dllinfo_endpoint)) {
+    abort("The only argument allowed for an init function is a `DllInfo*`.")
+  }
+
+  args <- substr(args, 1L, loc_dllinfo_endpoint - 1L)
 
   if (!identical(args, "DllInfo")) {
-    abort("The only argument allowed for an init function is a `DllInfo`.")
+    abort("The only argument allowed for an init function is a `DllInfo*`.")
   }
 
   new_init_info(loc_signature, name)
