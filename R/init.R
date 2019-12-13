@@ -145,7 +145,9 @@ write_register_callables <- function(lines, info, pkg, hidden) {
     double_quote(pkg),
     ", ",
     double_quote(name_callable),
-    ", (DL_FUNC) &",
+    ",",
+    compute_padding(name_callable),
+    "(DL_FUNC) &",
     names,
     ");"
   )
@@ -302,7 +304,7 @@ compute_padding <- function(x) {
   chars <- nchar(x)
   widest <- max(chars)
 
-  n_padding <- widest + 4L - chars
+  n_padding <- widest + 1L - chars
 
   padding <- map_chr(n_padding, pad_dup)
 
