@@ -176,7 +176,21 @@ test_that("error if invalid function arguments", {
 
   expect_error(
     parse_attributes(code),
-    'unused argument [(]names = "fn"[)]'
+    'Detected the following misspelled attribute argument names: "names"'
+  )
+})
+
+test_that("error if unnamed arguments", {
+  code <- to_lines("
+    // [[ export('fn') ]]
+    SEXP fn(SEXP x) {
+      return x;
+    }
+  ")
+
+  expect_error(
+    parse_attributes(code),
+    "All arguments to an attribute function must be named"
   )
 })
 

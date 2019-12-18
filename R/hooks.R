@@ -1,4 +1,5 @@
-hook_export <- function(name = NA_character_) {
+hook_export <- function(..., name = NA_character_) {
+  validate_no_dots(...)
   validate_name(name)
 
   args <- list(
@@ -8,7 +9,8 @@ hook_export <- function(name = NA_character_) {
   new_argument_df(attribute = "export", args = list(args))
 }
 
-hook_export_external2 <- function(n, name = NA_character_) {
+hook_export_external2 <- function(..., n, name = NA_character_) {
+  validate_no_dots(...)
   validate_name(name)
 
   if (missing(n)) {
@@ -28,7 +30,8 @@ hook_export_external2 <- function(n, name = NA_character_) {
   new_argument_df(attribute = "export_external2", args = list(args))
 }
 
-hook_export_external <- function(n, name = NA_character_) {
+hook_export_external <- function(..., n, name = NA_character_) {
+  validate_no_dots(...)
   validate_name(name)
 
   if (missing(n)) {
@@ -48,7 +51,8 @@ hook_export_external <- function(n, name = NA_character_) {
   new_argument_df(attribute = "export_external", args = list(args))
 }
 
-hook_callable <- function(name = NA_character_, hidden = FALSE) {
+hook_callable <- function(..., name = NA_character_, hidden = FALSE) {
+  validate_no_dots(...)
   validate_name(name)
 
   if (!is.logical(hidden)) {
@@ -68,10 +72,13 @@ hook_callable <- function(name = NA_character_, hidden = FALSE) {
   new_argument_df(attribute = "callable", args = list(args))
 }
 
-hook_init <- function() {
+hook_init <- function(...) {
+  validate_no_dots(...)
   args <- list()
   new_argument_df(attribute = "init", args = list(args))
 }
+
+# ------------------------------------------------------------------------------
 
 class_collapse <- function(x) {
   paste(class(x), collapse = "/")
@@ -110,4 +117,29 @@ validate_n <- function(n) {
   }
 
   n
+}
+
+validate_no_dots <- function(...) {
+  dots <- list(...)
+
+  if (length(dots) == 0) {
+    return(invisible())
+  }
+
+  nms <- names(dots)
+
+  if (is.null(nms)) {
+    msg <- "All arguments to an attribute function must be named."
+  } else {
+    nms <- paste0(double_quote(nms), collapse = ", ")
+
+    msg <- paste0(
+      "All arguments to an attribute function must be ",
+      "named and spelled correctly. ",
+      "Detected the following misspelled attribute argument names: ",
+      nms
+    )
+  }
+
+  abort(msg)
 }
