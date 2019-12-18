@@ -138,7 +138,7 @@ interest and formatted like <code>// [[ export() ]]</code>. See the sections bel
 for a complete description.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>write_init</span>(<span class='kw'>path</span> <span class='kw'>=</span> <span class='st'>"."</span>)</pre>
+    <pre class="usage"><span class='fu'>write_init</span>(<span class='kw'>path</span> <span class='kw'>=</span> <span class='st'>"."</span>, <span class='kw'>debug</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -148,8 +148,18 @@ for a complete description.</p>
       <td><p><code>[character(1)]</code></p>
 <p>The relative file path to the top level of your package.</p></td>
     </tr>
+    <tr>
+      <th>debug</th>
+      <td><p><code>[logical(1)]</code></p>
+<p>Should the lines that will be used to construct the <code>init.c</code> file be
+returned as a character vector rather than written to disk?</p></td>
+    </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>If <code>debug = FALSE</code>, the lines used to create the <code>init.c</code> file, invisibly.
+If <code>debug = TRUE</code>, the lines are returned visibly.</p>
     <h2 class="hasAnchor" id="export"><a class="anchor" href="#export"></a>Export</h2>
 
     
@@ -225,6 +235,7 @@ a <code>DllInfo*</code>, typically given the variable name <code>dll</code>.</p>
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
       <li><a href="#export">Export</a></li>
       <li><a href="#export-external-external-">Export External / External2</a></li>
       <li><a href="#callable">Callable</a></li>
