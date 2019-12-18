@@ -71,6 +71,19 @@ test_that("can generate callable api files", {
   )
 })
 
+test_that("can generate callable api files from functions with non-SEXP arguments", {
+  x <- process_attributes(path_package("api-test-2"), debug = TRUE)
+
+  verify_output(
+    test_path("output/api-test-2.txt"),
+    {
+      cat2(x$init)
+      cat2(x$api_c)
+      cat2(x$api_h)
+    }
+  )
+})
+
 # ------------------------------------------------------------------------------
 # `path` validation
 

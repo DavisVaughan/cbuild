@@ -1,0 +1,53 @@
+> cat2(x$init)
+// File generated automatically by cbuild - please do not modify by hand
+
+#include <R.h>
+#include <Rinternals.h>
+#include <stdlib.h> // for NULL
+#include <stdbool.h> // for bool
+#include <R_ext/Rdynload.h>
+
+// Callable API declarations
+extern R_len_t file1_fn1(int *);
+extern enum my_enum file1_fn2(enum my_enum);
+
+void R_init_test(DllInfo *dll) {
+  R_registerRoutines(dll, NULL, NULL, NULL, NULL);
+  R_useDynamicSymbols(dll, FALSE);
+
+  // Callable API registrations
+  R_RegisterCCallable("test", "file1_fn1", (DL_FUNC) &file1_fn1);
+  R_RegisterCCallable("test", "file1_fn2", (DL_FUNC) &file1_fn2);
+}
+
+
+> cat2(x$api_c)
+// File generated automatically by cbuild - please do not modify by hand
+
+#include "test.h"
+
+R_len_t (*file1_fn1)(int *) = NULL;
+enum my_enum (*file1_fn2)(enum my_enum) = NULL;
+
+void test_init_api() {
+  file1_fn1 = (R_len_t (*)(int *)) R_GetCCallable("test", "file1_fn1");
+  file1_fn2 = (enum my_enum (*)(enum my_enum)) R_GetCCallable("test", "file1_fn2");
+}
+
+> cat2(x$api_h)
+// File generated automatically by cbuild - please do not modify by hand
+
+#ifndef TEST_H
+#define TEST_H
+
+#include <Rinternals.h>
+#include <R_ext/Rdynload.h>
+#include <stdbool.h>
+
+R_len_t (*file1_fn1)(int *);
+enum my_enum (*file1_fn2)(enum my_enum);
+
+void test_init_api();
+
+#endif
+
