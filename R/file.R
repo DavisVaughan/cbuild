@@ -79,7 +79,7 @@ source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
   path_src <- normalizePath(path_src, winslash = "/", mustWork = FALSE)
   path_so <- normalizePath(path_so, winslash = "/", mustWork = FALSE)
 
-  write_lines(path_src, lines)
+  write_lines(path_src, lines, sep = "\n")
 
   output <- r_shlib(path_src, path_so)
 

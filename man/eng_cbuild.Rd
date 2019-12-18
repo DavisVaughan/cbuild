@@ -15,18 +15,18 @@ C chunks. It is automatically registered when cbuild is loaded with
 \code{library(cbuild)}, so there is no need to set it manually.
 
 To use it, create a standard R Markdown chunk, and put \code{cbuild} as the
-engine name, like this:\preformatted{```{cbuild}
+engine name, like this:\preformatted{```\{cbuild\}
 // [[ export() ]]
-SEXP fn(SEXP x) {
+SEXP fn(SEXP x) \{
   return x;
-}
+\}
 ```
 }
 
 The engine is powered by \code{\link[=source_code]{source_code()}}.
 
 By default, the engine will assign any functions that have been marked
-with \code{// [[ export() ]]} into the \code{knitr::knit_global()} environment, but
+with \verb{// [[ export() ]]} into the \code{knitr::knit_global()} environment, but
 this can be controlled with the knitr option, \code{cbuild.env}, see below.
 }
 \details{
@@ -49,24 +49,24 @@ environment.
 
 This is an example of how you could customize all 3 options:
 
-First create an R chunk with an alternative environment:\preformatted{```{r}
+First create an R chunk with an alternative environment:\preformatted{```\{r\}
 env <- new.env()
 ```
 }
 
-Now create our C chunk:\preformatted{```{cbuild, cbuild.includes = "Rdefines.h", cbuild.env = env, cbuild.no_remap = FALSE}
+Now create our C chunk:\preformatted{```\{cbuild, cbuild.includes = "Rdefines.h", cbuild.env = env, cbuild.no_remap = FALSE\}
 // [[ export() ]]
-SEXP fn(SEXP x) {
+SEXP fn(SEXP x) \{
   // `NUMERIC_POINTER()` is only available in `Rdefines.h`
   double* p_x = NUMERIC_POINTER(x);
 
   // Would be `Rf_ScalarReal()` if no remap was done
   return ScalarReal(p_x[0]);
-}
+\}
 ```
 }
 
-After running the C chunk, we can do:\preformatted{```{r}
+After running the C chunk, we can do:\preformatted{```\{r\}
 env$fn(2)
 # [1] 2
 ```

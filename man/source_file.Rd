@@ -7,30 +7,30 @@
 source_file(file, includes = NULL, no_remap = TRUE, show = FALSE)
 }
 \arguments{
-\item{file}{\code{[character(1)]}
+\item{file}{\verb{[character(1)]}
 
 The C file to source.}
 
-\item{includes}{\code{[NULL / character()]}
+\item{includes}{\verb{[NULL / character()]}
 
 Extra includes to add manually. By default, \code{R.h} and \code{Rinternals.h} are
 included. Specify more includes with their file name. For example, to
-include \code{#include <Rdefines.h>} you just need to specify \code{"Rdefines.h"}.}
+include \verb{#include <Rdefines.h>} you just need to specify \code{"Rdefines.h"}.}
 
-\item{no_remap}{\code{[logical(1)]}
+\item{no_remap}{\verb{[logical(1)]}
 
-Should \code{#define R_NO_REMAP} be defined?}
+Should \verb{#define R_NO_REMAP} be defined?}
 
-\item{show}{\code{[logical(1)]}
+\item{show}{\verb{[logical(1)]}
 
-Should the output of compiling the source code with \code{R CMD SHLIB} be shown?}
+Should the output of compiling the source code with \verb{R CMD SHLIB} be shown?}
 }
 \value{
 A named list containing the functions specified for export.
 }
 \description{
 \code{source_file()} will parse through \code{file} looking for functions tagged with
-\code{// [[ export() ]]} and will compile the file and export those functions to
+\verb{// [[ export() ]]} and will compile the file and export those functions to
 the R side.
 }
 \examples{

@@ -15,8 +15,8 @@ read_lines <- function(con, error = TRUE) {
   x
 }
 
-write_lines <- function(file, lines) {
-  writeLines(lines, file)
+write_lines <- function(file, lines, sep = "") {
+  writeLines(lines, file, sep = sep)
   invisible(file)
 }
 

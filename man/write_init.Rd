@@ -4,12 +4,21 @@
 \alias{write_init}
 \title{Write an \code{init.c} file}
 \usage{
-write_init(path = ".")
+write_init(path = ".", debug = FALSE)
 }
 \arguments{
-\item{path}{\code{[character(1)]}
+\item{path}{\verb{[character(1)]}
 
 The relative file path to the top level of your package.}
+
+\item{debug}{\verb{[logical(1)]}
+
+Should the lines that will be used to construct the \code{init.c} file be
+returned as a character vector rather than written to disk?}
+}
+\value{
+If \code{debug = FALSE}, the lines used to create the \code{init.c} file, invisibly.
+If \code{debug = TRUE}, the lines are returned visibly.
 }
 \description{
 \code{write_init()} generates a \code{src/init.c} file. It automates a number of tasks,
@@ -18,13 +27,13 @@ such as:
 \item Exporting C functions to the R side through the \code{.Call} and \code{.External}
 mechanisms.
 \item Registering C callables for use by other packages, and optionally
-creating bindings for them in \code{inst/include/<pkg>/<pkg>.h} and
-\code{inst/include/<pkg>/<pkg>.c}.
+creating bindings for them in \verb{inst/include/<pkg>/<pkg>.h} and
+\verb{inst/include/<pkg>/<pkg>.c}.
 }
 
 \code{write_init()} determines the functions to include in the \code{init.c} file
 through the use of C comments placed directly above the function of
-interest and formatted like \code{// [[ export() ]]}. See the sections below
+interest and formatted like \verb{// [[ export() ]]}. See the sections below
 for a complete description.
 }
 \section{Export}{
@@ -34,7 +43,7 @@ Export a C function to the R side as a \code{CallRoutine}, suitable for use with
 \code{.Call()}.\preformatted{// [[ export(name = NA_character_) ]]
 }
 \itemize{
-\item \code{name}: \code{[character(1)]}
+\item \code{name}: \verb{[character(1)]}
 
 A character string with no spaces in the name. Used to override
 the name that is generated for the R routine object. The default uses
@@ -50,13 +59,13 @@ with \code{.External()} or \code{.External2()}.\preformatted{// [[ export_extern
 // [[ export_external2(n, name = NA_character_) ]]
 }
 \itemize{
-\item \code{n}: \code{[integer(1)]}
+\item \code{n}: \verb{[integer(1)]}
 
 The number of arguments expected when calling this routine \emph{from the
 R side}. Meaning that if you have a routine called \code{pkg_my_fun} that
 you plan to call like \code{.External(pkg_my_fn, arg1, arg2)}, then you should
 pass \code{n = 2}.
-\item \code{name}: \code{[character(1)]}
+\item \code{name}: \verb{[character(1)]}
 
 A character string with no spaces in the name. Used to override
 the name that is generated for the R routine object. The default uses
@@ -70,15 +79,15 @@ the name of the exported C function as the name for the R routine.
 Register a C function to be callable by other R packages.\preformatted{// [[ callable(name = NA_character_, hidden = FALSE) ]]
 }
 \itemize{
-\item \code{name}: \code{[character(1)]}
+\item \code{name}: \verb{[character(1)]}
 
 A character string with no spaces in the name. Used to override
 the name that is generated for the callable object. The default uses
 the name of the exported C function as the name for the callable.
-\item \code{hidden}: \code{[logical(1)]}
+\item \code{hidden}: \verb{[logical(1)]}
 
 A logical. Should the registered callable also get an entry in the API
-files created in \code{./inst/include/}? The default includes it in the API.
+files created in \verb{./inst/include/}? The default includes it in the API.
 Flipping to \code{hidden = TRUE} registers the callable with
 \code{R_RegisterCCallable()} but does not generate an API entry for it, meaning
 that it can only be retrieved by another package's C code by using
@@ -91,9 +100,9 @@ that it can only be retrieved by another package's C code by using
 
 Sometimes you need to initialize extra objects at package load time. By
 marking a function with \code{init()}, it will get included at the end of the
-call to \code{R_init_<pkg>()}, which is called whenever the package is loaded.
+call to \verb{R_init_<pkg>()}, which is called whenever the package is loaded.
 The function marked with \code{init()} should return \code{void} and take 1 argument,
-a \code{DllInfo*}, typically given the variable name \code{dll}.\preformatted{// [[ init() ]]
+a \verb{DllInfo*}, typically given the variable name \code{dll}.\preformatted{// [[ init() ]]
 }
 }
 

@@ -7,23 +7,23 @@
 source_function(x, includes = NULL, no_remap = TRUE, show = FALSE)
 }
 \arguments{
-\item{x}{\code{[character(1)]}
+\item{x}{\verb{[character(1)]}
 
 A block of code containing a single C function to compile.}
 
-\item{includes}{\code{[NULL / character()]}
+\item{includes}{\verb{[NULL / character()]}
 
 Extra includes to add manually. By default, \code{R.h} and \code{Rinternals.h} are
 included. Specify more includes with their file name. For example, to
-include \code{#include <Rdefines.h>} you just need to specify \code{"Rdefines.h"}.}
+include \verb{#include <Rdefines.h>} you just need to specify \code{"Rdefines.h"}.}
 
-\item{no_remap}{\code{[logical(1)]}
+\item{no_remap}{\verb{[logical(1)]}
 
-Should \code{#define R_NO_REMAP} be defined?}
+Should \verb{#define R_NO_REMAP} be defined?}
 
-\item{show}{\code{[logical(1)]}
+\item{show}{\verb{[logical(1)]}
 
-Should the output of compiling the source code with \code{R CMD SHLIB} be shown?}
+Should the output of compiling the source code with \verb{R CMD SHLIB} be shown?}
 }
 \value{
 An R function that calls the compiled C code.
@@ -31,7 +31,7 @@ An R function that calls the compiled C code.
 \description{
 \code{source_function()} is the most basic way to source a C function to the R
 side. It sources a single C function and exports it on the R side. There
-is no need to include the \code{// [[ export() ]]} tag when
+is no need to include the \verb{// [[ export() ]]} tag when
 using \code{source_function()}, since only one function will be exported.
 }
 \examples{

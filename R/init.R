@@ -20,6 +20,15 @@
 #'
 #'   The relative file path to the top level of your package.
 #'
+#' @param debug `[logical(1)]`
+#'
+#'   Should the lines that will be used to construct the `init.c` file be
+#'   returned as a character vector rather than written to disk?
+#'
+#' @return
+#' If `debug = FALSE`, the lines used to create the `init.c` file, invisibly.
+#' If `debug = TRUE`, the lines are returned visibly.
+#'
 #' @section Export:
 #'
 #' Export a C function to the R side as a `CallRoutine`, suitable for use with
@@ -94,7 +103,11 @@
 #' ```
 #'
 #' @export
-write_init <- function(path = ".") {
+write_init <- function(path = ".", debug = FALSE) {
+  if (!is.logical(debug) || is.na(debug) || length(debug) != 1L) {
+    abort("`debug` must be a bool (TRUE / FALSE).")
+  }
+
   if (!has_src(path)) {
     abort(
       "`path` must point to an R package with a `src` folder to ",
@@ -102,16 +115,13 @@ write_init <- function(path = ".") {
     )
   }
 
-  dir_src <- dir_src(path)
-  path_init <- path_init(path)
-
-  if (!can_write_init(path_init)) {
+  if (!debug && !can_write_init(path)) {
     return(invisible(path))
   }
 
   pkg <- package_name(path)
 
-  info <- collect_attributes_and_signatures(dir_src)
+  info <- collect_attributes_and_signatures(path)
 
   lines <- character()
 
@@ -124,12 +134,266 @@ write_init <- function(path = ".") {
   lines <- write_init_hook_declarations(lines, info)
   lines <- write_r_init_pkg(lines, info, pkg)
 
+  if (debug) {
+    return(lines)
+  }
+
+  path_init <- path_init(path)
   remove_preexiting_init(path_init)
   create_new_init(path_init)
-  writeLines(lines, path_init, sep = "")
+  write_lines(path_init, lines)
 
-  invisible(path)
+  invisible(lines)
 }
+
+# ------------------------------------------------------------------------------
+
+write_do_not_modify <- function(lines) {
+  c(lines, do_not_modify(), new_line(), new_line())
+}
+
+do_not_modify <- function() {
+  "// File generated automatically by cbuild - please do not modify by hand"
+}
+
+# ------------------------------------------------------------------------------
+
+write_init_includes <- function(lines) {
+  c(
+    lines,
+    "#include <R.h>",
+    new_line(),
+    "#include <Rinternals.h>",
+    new_line(),
+    "#include <stdlib.h> // for NULL",
+    new_line(),
+    "#include <stdbool.h> // for bool",
+    new_line(),
+    "#include <R_ext/Rdynload.h>",
+    new_line(),
+    new_line()
+  )
+}
+
+# ------------------------------------------------------------------------------
+
+write_call_exports_and_entries <- function(lines, info) {
+  info <- info[info$attribute == "export",]
+  info <- unnest_args(info)
+
+  if (nrow(info) == 0L) {
+    return(lines)
+  }
+
+  signatures <- info$signature
+
+  lines <- write_call_exports(lines, signatures)
+  lines <- write_call_entries(lines, signatures)
+
+  lines
+}
+
+write_call_exports <- function(lines, signatures) {
+  names <- map_chr(signatures, function(x) x$name)
+
+  n_args <- map_int(signatures, function(x) x$n_args)
+  sexp_arg_list <- map_chr(n_args, make_sexp_arg_list)
+
+  declarations <- paste0("extern SEXP ", names, "(", sexp_arg_list, ");")
+
+  lines <- add_lines(lines, "// .Call declarations")
+  lines <- add_lines(lines, declarations)
+  lines <- c(lines, new_line())
+
+  lines
+}
+
+write_call_entries <- function(lines, signatures) {
+  names <- map_chr(signatures, function(x) x$name)
+  names_export <- map_chr(signatures, function(x) x$name_export)
+  names_export <- double_quote(names_export)
+  n_args <- map_int(signatures, function(x) x$n_args)
+
+  padding <- compute_padding(names_export)
+
+  header <- "static const R_CallMethodDef CallEntries[] = {"
+  entries <- paste0("  {", names_export, ",", padding, "(DL_FUNC) &", names, ", ", n_args, "},")
+  ender <- "  {NULL, NULL, 0}"
+  footer <- "};"
+
+  lines <- add_lines(lines, "// .Call entries")
+  lines <- add_lines(lines, header)
+  lines <- add_lines(lines, entries)
+  lines <- add_lines(lines, ender)
+  lines <- add_lines(lines, footer)
+
+  lines <- c(lines, new_line())
+
+  lines
+}
+
+# ------------------------------------------------------------------------------
+
+write_external_exports_and_entries <- function(lines, info) {
+  lines <- write_external_exports(lines, info, two = FALSE)
+  lines <- write_external_exports(lines, info, two = TRUE)
+  lines <- write_external_entries(lines, info)
+  lines
+}
+
+write_external_exports <- function(lines, info, two = FALSE) {
+  if (two) {
+    type <- "export_external2"
+    n_sexps <- 4L
+    comment <- "// .External2 declarations"
+  } else {
+    type <- "export_external"
+    n_sexps <- 1L
+    comment <- "// .External declarations"
+  }
+
+  info <- info[info$attribute == type,]
+
+  if (nrow(info) == 0L) {
+    return(lines)
+  }
+
+  info <- unnest_args(info)
+
+  signatures <- info$signature
+
+  names <- map_chr(signatures, function(x) x$name)
+
+  n_args <- rep(n_sexps, length(signatures))
+  sexp_arg_list <- map_chr(n_args, make_sexp_arg_list)
+
+  declarations <- paste0("extern SEXP ", names, "(", sexp_arg_list, ");")
+
+  lines <- add_lines(lines, comment)
+  lines <- add_lines(lines, declarations)
+  lines <- c(lines, new_line())
+
+  lines
+}
+
+write_external_entries <- function(lines, info) {
+  all_external <- info$attribute == "export_external" |
+    info$attribute == "export_external2"
+
+  info <- info[all_external,]
+
+  if (nrow(info) == 0L) {
+    return(lines)
+  }
+
+  header <- "static const R_ExternalMethodDef ExtEntries[] = {"
+  ender <- "  {NULL, NULL, 0}"
+  footer <- "};"
+
+  lines <- add_lines(lines, "// .External / .External2 entries")
+  lines <- add_lines(lines, header)
+  lines <- add_external_entries(lines, info)
+  lines <- add_lines(lines, ender)
+  lines <- add_lines(lines, footer)
+  lines <- c(lines, new_line())
+
+  lines
+}
+
+add_external_entries <- function(lines, info) {
+  if (nrow(info) == 0L) {
+    return(lines)
+  }
+
+  info <- unnest_args(info)
+  signatures <- info$signature
+
+  names <- map_chr(signatures, function(x) x$name)
+  names_export <- map_chr(signatures, function(x) x$name_export)
+  names_export <- double_quote(names_export)
+
+  n <- info$n
+
+  padding <- compute_padding(names_export)
+
+  entries <- paste0("  {", names_export, ",", padding, "(DL_FUNC) &", names, ", ", n, "},")
+
+  lines <- add_lines(lines, entries)
+
+  lines
+}
+
+# ------------------------------------------------------------------------------
+
+write_callables <- function(lines, info, hidden) {
+  callable <- info[info$attribute == "callable",]
+  is_hidden <- map_lgl(callable$args, function(x) x$hidden)
+
+  if (!hidden) {
+    is_hidden <- !is_hidden
+  }
+
+  callable <- callable[is_hidden,]
+
+  if (nrow(callable) == 0L) {
+    return(lines)
+  }
+
+  # Ensure callables have not already been declared by .Call or .External2/.External
+  info <- remove_exports(callable, info)
+
+  if (nrow(info) == 0L) {
+    return(lines)
+  }
+
+  signatures <- info$signature
+
+  names <- map_chr(signatures, function(x) x$name)
+
+  types <- map(signatures, function(x) x$arg_types)
+  types <- map(types, function(x) paste0(x, collapse = ", "))
+
+  return <- map_chr(signatures, function(x) x$return)
+
+  declarations <- paste0("extern ", return, " ", names, "(", types, ");")
+
+  if (hidden) {
+    lines <- add_lines(lines, "// Hidden callable API declarations")
+  } else {
+    lines <- add_lines(lines, "// Callable API declarations")
+  }
+
+  lines <- add_lines(lines, declarations)
+  lines <- c(lines, new_line())
+
+  lines
+}
+
+remove_exports <- function(callable, info) {
+  loc_all_exports <- info$attribute == "export" |
+    info$attribute == "export_external" |
+    info$attribute == "export_external2"
+
+  exports <- info[loc_all_exports,]
+
+  if (nrow(exports) == 0L) {
+    return(callable)
+  }
+
+  exports_id <- paste0(exports$file, "_", exports$loc)
+  callable_id <- paste0(callable$file, "_", callable$loc)
+
+  matches <- match(exports_id, callable_id)
+  matches <- matches[!is.na(matches)]
+
+  if (length(matches) == 0L) {
+    callable
+  } else {
+    callable[-matches,]
+  }
+}
+
+# ------------------------------------------------------------------------------
 
 write_init_hook_declarations <- function(lines, info) {
   info <- info[info$attribute == "init",]
@@ -150,15 +414,7 @@ write_init_hook_declarations <- function(lines, info) {
   lines
 }
 
-has_exports <- function(info, type) {
-  info <- info[info$attribute == type,]
-
-  if (nrow(info) == 0L) {
-    FALSE
-  } else {
-    TRUE
-  }
-}
+# ------------------------------------------------------------------------------
 
 write_r_init_pkg <- function(lines, info, pkg) {
   if (has_exports(info, "export")) {
@@ -167,7 +423,7 @@ write_r_init_pkg <- function(lines, info, pkg) {
     call_entries <- "NULL"
   }
 
-  if (has_exports(info, "export_external")) {
+  if (has_exports(info, "export_external") | has_exports(info, "export_external2")) {
     external_entries <- "ExtEntries"
   } else {
     external_entries <- "NULL"
@@ -259,286 +515,11 @@ write_register_callables <- function(lines, info, pkg, hidden) {
   lines
 }
 
-package_name <- function(path) {
-  path <- normalize_path(path)
-  path_desc <- file.path(path, "DESCRIPTION")
+# ------------------------------------------------------------------------------
 
-  if (!file.exists(path_desc)) {
-    abort("A `DESCRIPTION` file must exist in the package.")
-  }
+collect_attributes_and_signatures <- function(path) {
+  dir_src <- dir_src(path)
 
-  pkg <- read.dcf(path_desc, fields = "Package")
-  pkg <- as.vector(pkg)
-
-  if (is.na(pkg)) {
-    abort("The package `DESCRIPTION` file must include a package name.")
-  }
-
-  pkg
-}
-
-remove_exports <- function(callable, info) {
-  loc_all_exports <- info$attribute == "export" |
-    info$attribute == "export_external" |
-    info$attribute == "export_external2"
-
-  exports <- info[loc_all_exports,]
-
-  if (nrow(exports) == 0L) {
-    return(callable)
-  }
-
-  exports_id <- paste0(exports$file, "_", exports$loc)
-  callable_id <- paste0(callable$file, "_", callable$loc)
-
-  matches <- match(exports_id, callable_id)
-  matches <- matches[!is.na(matches)]
-
-  if (length(matches) == 0L) {
-    callable
-  } else {
-    callable[-matches,]
-  }
-}
-
-write_callables <- function(lines, info, hidden) {
-  callable <- info[info$attribute == "callable",]
-  is_hidden <- map_lgl(callable$args, function(x) x$hidden)
-
-  if (!hidden) {
-    is_hidden <- !is_hidden
-  }
-
-  callable <- callable[is_hidden,]
-
-  if (nrow(callable) == 0L) {
-    return(lines)
-  }
-
-  # Ensure callables have not already been declared by .Call or .External2/.External
-  info <- remove_exports(callable, info)
-
-  if (nrow(info) == 0L) {
-    return(lines)
-  }
-
-  signatures <- info$signature
-
-  names <- map_chr(signatures, function(x) x$name)
-
-  types <- map(signatures, function(x) x$arg_types)
-  types <- map(types, function(x) paste0(x, collapse = ", "))
-
-  return <- map_chr(signatures, function(x) x$return)
-
-  declarations <- paste0("extern ", return, " ", names, "(", types, ");")
-
-  if (hidden) {
-    lines <- add_lines(lines, "// Hidden callable API declarations")
-  } else {
-    lines <- add_lines(lines, "// Callable API declarations")
-  }
-
-  lines <- add_lines(lines, declarations)
-  lines <- c(lines, new_line())
-
-  lines
-}
-
-write_external_exports_and_entries <- function(lines, info) {
-  lines <- write_external_exports(lines, info, two = FALSE)
-  lines <- write_external_exports(lines, info, two = TRUE)
-  lines <- write_external_entries(lines, info)
-  lines
-}
-
-write_external_exports <- function(lines, info, two = FALSE) {
-  if (two) {
-    type <- "export_external2"
-    n_sexps <- 4L
-    comment <- "// .External2 declarations"
-  } else {
-    type <- "export_external"
-    n_sexps <- 1L
-    comment <- "// .External declarations"
-  }
-
-  info <- info[info$attribute == type,]
-
-  if (nrow(info) == 0L) {
-    return(lines)
-  }
-
-  info <- unnest_args(info)
-
-  signatures <- info$signature
-
-  names <- map_chr(signatures, function(x) x$name)
-
-  n_args <- rep(n_sexps, length(signatures))
-  sexp_arg_list <- map_chr(n_args, make_sexp_arg_list)
-
-  declarations <- paste0("extern SEXP ", names, "(", sexp_arg_list, ");")
-
-  lines <- add_lines(lines, comment)
-  lines <- add_lines(lines, declarations)
-  lines <- c(lines, new_line())
-
-  lines
-}
-
-write_external_entries <- function(lines, info) {
-  all_external <- info$attribute == "export_external" | info$attribute == "export_external2"
-
-  info <- info[all_external,]
-
-  if (nrow(info) == 0L) {
-    return(lines)
-  }
-
-  header <- "static const R_ExternalMethodDef ExtEntries[] = {"
-  ender <- "  {NULL, NULL, 0}"
-  footer <- "};"
-
-  lines <- add_lines(lines, "// .External / .External2 entries")
-  lines <- add_lines(lines, header)
-  lines <- add_external_entries(lines, info)
-  lines <- add_lines(lines, ender)
-  lines <- add_lines(lines, footer)
-  lines <- c(lines, new_line())
-
-  lines
-}
-
-add_external_entries <- function(lines, info) {
-  if (nrow(info) == 0L) {
-    return(lines)
-  }
-
-  info <- unnest_args(info)
-  signatures <- info$signature
-
-  names <- map_chr(signatures, function(x) x$name)
-  names_export <- map_chr(signatures, function(x) x$name_export)
-  names_export <- double_quote(names_export)
-
-  n <- info$n
-
-  padding <- compute_padding(names_export)
-
-  entries <- paste0("  {", names_export, ",", padding, "(DL_FUNC) &", names, ", ", n, "},")
-
-  lines <- add_lines(lines, entries)
-
-  lines
-}
-
-compute_padding <- function(x) {
-  chars <- nchar(x)
-  widest <- max(chars)
-
-  n_padding <- widest + 1L - chars
-
-  padding <- map_chr(n_padding, pad_dup)
-
-  padding
-}
-
-pad_dup <- function(times) {
-  paste0(rep(" ", times = times), collapse = "")
-}
-
-write_call_exports_and_entries <- function(lines, info) {
-  info <- info[info$attribute == "export",]
-  info <- unnest_args(info)
-
-  if (nrow(info) == 0L) {
-    return(lines)
-  }
-
-  signatures <- info$signature
-
-  lines <- write_call_exports(lines, signatures)
-  lines <- write_call_entries(lines, signatures)
-
-  lines
-}
-
-write_call_exports <- function(lines, signatures) {
-  names <- map_chr(signatures, function(x) x$name)
-
-  n_args <- map_int(signatures, function(x) x$n_args)
-  sexp_arg_list <- map_chr(n_args, make_sexp_arg_list)
-
-  declarations <- paste0("extern SEXP ", names, "(", sexp_arg_list, ");")
-
-  lines <- add_lines(lines, "// .Call declarations")
-  lines <- add_lines(lines, declarations)
-  lines <- c(lines, new_line())
-
-  lines
-}
-
-write_call_entries <- function(lines, signatures) {
-  names <- map_chr(signatures, function(x) x$name)
-  names_export <- map_chr(signatures, function(x) x$name_export)
-  names_export <- double_quote(names_export)
-  n_args <- map_int(signatures, function(x) x$n_args)
-
-  padding <- compute_padding(names_export)
-
-  header <- "static const R_CallMethodDef CallEntries[] = {"
-  entries <- paste0("  {", names_export, ",", padding, "(DL_FUNC) &", names, ", ", n_args, "},")
-  ender <- "  {NULL, NULL, 0}"
-  footer <- "};"
-
-  lines <- add_lines(lines, "// .Call entries")
-  lines <- add_lines(lines, header)
-  lines <- add_lines(lines, entries)
-  lines <- add_lines(lines, ender)
-  lines <- add_lines(lines, footer)
-
-  lines <- c(lines, new_line())
-
-  lines
-}
-
-make_sexp_arg_list <- function(n) {
-  if (n == 0L) {
-    return("")
-  }
-
-  out <- "SEXP"
-
-  if (n == 1L) {
-    return(out)
-  }
-
-  out <- c(out, rep(", SEXP", n - 1L))
-  out <- paste0(out, collapse = "")
-
-  out
-}
-
-add_new_line <- function(lines) {
-  add_lines(lines, new_line())
-}
-
-add_lines <- function(lines, ...) {
-  additions <- c(...)
-  new_lines <- rep(new_line(), length(additions))
-
-  additions <- interleave(additions, new_lines)
-
-  c(lines, additions)
-}
-
-interleave <- function(x, y) {
-  idx <- order(c(seq_along(x), seq_along(y)))
-  c(x, y)[idx]
-}
-
-collect_attributes_and_signatures <- function(dir_src) {
   # TODO should it be recursive? rlang?
   path_src_files <- list.files(
     dir_src,
@@ -580,30 +561,7 @@ parse_attributes_and_signatures_in_file <- function(file) {
   info
 }
 
-write_init_includes <- function(lines) {
-  c(
-    lines,
-    "#include <R.h>",
-    new_line(),
-    "#include <Rinternals.h>",
-    new_line(),
-    "#include <stdlib.h> // for NULL",
-    new_line(),
-    "#include <stdbool.h> // for bool",
-    new_line(),
-    "#include <R_ext/Rdynload.h>",
-    new_line(),
-    new_line()
-  )
-}
-
-new_line <- function() {
-  "\n"
-}
-
-write_do_not_modify <- function(lines) {
-  c(lines, do_not_modify(), new_line(), new_line())
-}
+# ------------------------------------------------------------------------------
 
 create_new_init <- function(path_init) {
   success <- file.create(path_init)
@@ -629,7 +587,9 @@ remove_preexiting_init <- function(path_init) {
   invisible()
 }
 
-can_write_init <- function(path_init) {
+can_write_init <- function(path) {
+  path_init <- path_init(path)
+
   if (!file.exists(path_init)) {
     return(TRUE)
   }
@@ -659,20 +619,84 @@ can_write_init <- function(path_init) {
   }
 }
 
-do_not_modify <- function() {
-  "// File generated automatically by cbuild - please do not modify by hand"
+# ------------------------------------------------------------------------------
+
+has_exports <- function(info, type) {
+  info <- info[info$attribute == type,]
+
+  if (nrow(info) == 0L) {
+    FALSE
+  } else {
+    TRUE
+  }
 }
 
-dir_package <- function(path) {
+package_name <- function(path) {
   path <- normalize_path(path)
-
   path_desc <- file.path(path, "DESCRIPTION")
 
   if (!file.exists(path_desc)) {
-    abort("`path` must refer to the top level of an R package.")
+    abort("A `DESCRIPTION` file must exist in the package.")
   }
 
-  path
+  pkg <- read.dcf(path_desc, fields = "Package")
+  pkg <- as.vector(pkg)
+
+  if (is.na(pkg)) {
+    abort("The package `DESCRIPTION` file must include a package name.")
+  }
+
+  pkg
+}
+
+compute_padding <- function(x) {
+  chars <- nchar(x)
+  widest <- max(chars)
+
+  n_padding <- widest + 1L - chars
+
+  padding <- map_chr(n_padding, pad_dup)
+
+  padding
+}
+
+pad_dup <- function(times) {
+  paste0(rep(" ", times = times), collapse = "")
+}
+
+make_sexp_arg_list <- function(n) {
+  if (n == 0L) {
+    return("")
+  }
+
+  out <- "SEXP"
+
+  if (n == 1L) {
+    return(out)
+  }
+
+  out <- c(out, rep(", SEXP", n - 1L))
+  out <- paste0(out, collapse = "")
+
+  out
+}
+
+add_lines <- function(lines, ...) {
+  additions <- c(...)
+  new_lines <- rep(new_line(), length(additions))
+
+  additions <- interleave(additions, new_lines)
+
+  c(lines, additions)
+}
+
+interleave <- function(x, y) {
+  idx <- order(c(seq_along(x), seq_along(y)))
+  c(x, y)[idx]
+}
+
+new_line <- function() {
+  "\n"
 }
 
 dir_src <- function(path) {
@@ -689,12 +713,6 @@ dir_src <- function(path) {
 path_init <- function(path) {
   path_src <- dir_src(path)
   file.path(path_src, "init.c")
-}
-
-has_init <- function(path) {
-  path <- normalize_path(path)
-  path_init <- file.path(path, "src", "init.c")
-  file.exists(path_init)
 }
 
 has_src <- function(path) {

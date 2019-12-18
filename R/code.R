@@ -40,7 +40,7 @@ source_code <- function(x, includes = NULL, no_remap = TRUE, show = FALSE) {
   temp_file <- tempfile(fileext = ".c")
   on.exit(unlink(temp_file, force = TRUE), add = TRUE)
 
-  write_lines(temp_file, x)
+  write_lines(temp_file, x, sep = "\n")
 
   source_file(temp_file, includes = includes, no_remap = no_remap, show = show)
 }
