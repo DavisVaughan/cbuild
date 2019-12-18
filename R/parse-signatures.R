@@ -558,3 +558,12 @@ parse_arguments_exports <- function(args) {
 
   args
 }
+
+split_by_comma <- function(x) {
+  strsplit(x, ",", fixed = TRUE)[[1]]
+}
+
+starts_with_SEXP <- function(x) {
+  substr(x, 1L, 5L) == "SEXP "
+}
+

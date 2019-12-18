@@ -725,6 +725,8 @@ cat_line <- function(...) {
   cat(paste0(..., "\n", collapse = ""))
 }
 
+# Very important for `make` on Windows to swap out the winslashes with
+# `/` not `\\`, otherwise the SHLIB call will not work
 normalize_path <- function(x, error = TRUE) {
   normalizePath(x, winslash = "/", mustWork = error)
 }

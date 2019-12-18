@@ -52,7 +52,7 @@ test_that("must have an attribute tag", {
     }
   "
 
-  expect_error(source_code(code), "At least 1 function")
+  expect_error(source_code(code), "at least 1 function")
 })
 
 # ------------------------------------------------------------------------------

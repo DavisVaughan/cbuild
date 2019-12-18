@@ -23,7 +23,7 @@ parse_attributes <- function(lines) {
   lines <- lines[lines != ""]
 
   # Pull the line number locations off
-  locs <- as.numeric(names(lines))
+  locs <- as.integer(names(lines))
   lines <- unname(lines)
 
   # Separate each potential attribute left by `;`

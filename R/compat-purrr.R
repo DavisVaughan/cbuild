@@ -73,5 +73,9 @@ pmap <- function(.l, .f, ...) {
     SIMPLIFY = FALSE, USE.NAMES = FALSE
   ))
 }
+pmap_chr <- function(.l, .f, ...) {
+  out <- pmap(.l, .f, ...)
+  map_chr(out, identity)
+}
 
 # nocov end

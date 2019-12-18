@@ -82,3 +82,21 @@ grepl_fixed <- function(x, pattern) {
 double_quote <- function(x) {
   encodeString(x, quote = "\"", na.encode = FALSE)
 }
+
+unnest_args <- function(attributes) {
+  lst_of_one_row_arg_dfs <- map(
+    attributes$args,
+    as.data.frame,
+    stringsAsFactors = FALSE
+  )
+
+  arg_df <- do.call(rbind, lst_of_one_row_arg_dfs)
+
+  attributes$args <- NULL
+
+  if (nrow(arg_df) == 0L) {
+    attributes
+  } else {
+    cbind(attributes, arg_df)
+  }
+}

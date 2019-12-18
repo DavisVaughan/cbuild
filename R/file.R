@@ -42,13 +42,22 @@
 #' sourced$fn(1)
 #' @export
 source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
-  file <- normalizePath(file, mustWork = TRUE)
-
+  file <- normalize_path(file)
   lines <- read_lines(file)
 
-  info <- parse_export_attributes_and_signatures(lines)
+  attributes <- parse_attributes(lines)
+  info <- parse_signatures(attributes, lines)
 
-  lines <- replace_function_names(lines, info)
+  # TODO - external/2 too?
+  info <- info[info$attribute == "export",]
+
+  if (nrow(info) == 0L) {
+    abort("The `file` must contain at least 1 function exported with `// [[ export() ]]`.")
+  }
+
+  signatures <- info$signature
+
+  lines <- write_exportables(lines, signatures)
 
   lines <- add_default_includes(lines)
 
@@ -74,10 +83,8 @@ source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
   # as it will be "open" while R is using it
   on.exit(file.remove(path_src), add = TRUE)
 
-  # Very important for `make` on Windows to swap out the winslashes with
-  # `/` not `\\`, otherwise the SHLIB call will not work
-  path_src <- normalizePath(path_src, winslash = "/", mustWork = FALSE)
-  path_so <- normalizePath(path_so, winslash = "/", mustWork = FALSE)
+  path_src <- normalize_path(path_src, error = FALSE)
+  path_so <- normalize_path(path_so, error = FALSE)
 
   write_lines(path_src, lines, sep = "\n")
 
@@ -90,8 +97,8 @@ source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
 
   dll_info <- dyn.load(path_so)
 
-  out <- map(info, function(x) make_function(x$name_export, x$args, dll_info))
-  names(out) <- map_chr(info, function(x) x$name_export)
+  out <- map(signatures, function(x) make_function(x$name_export, x$args, dll_info))
+  names(out) <- map_chr(signatures, function(x) x$name_export)
 
   out
 }
@@ -144,6 +151,8 @@ make_function <- function(name, args, dll_info) {
 
   fn
 }
+
+# ------------------------------------------------------------------------------
 
 add_default_includes <- function(lines) {
   c(
@@ -218,3 +227,42 @@ r_shlib <- function(path_src, path_so) {
 
   system(cmd, intern = TRUE)
 }
+
+# ------------------------------------------------------------------------------
+
+write_exportables <- function(lines, signatures) {
+  fn_names <- map_chr(signatures, function(x) x$name)
+
+  n_exportables <- length(fn_names)
+
+  export_names <- map_chr(signatures, function(x) x$name_export)
+  export_names <- paste0("cbuild_", export_names)
+
+  args <- map(signatures, function(x) x$args)
+  signature_args <- map_chr(args, make_signature_args)
+  fn_args <- map_chr(args, make_args)
+
+  headers <- paste0("SEXP ", export_names, "(", signature_args, ") {")
+  bodies <- paste0("  return ", fn_names, "(", fn_args, ");")
+  footers <- "}"
+
+  lines <- c(lines, new_line())
+
+  for (i in seq_len(n_exportables)) {
+    exportable <- c(headers[[i]], bodies[[i]], footers, new_line())
+    lines <- c(lines, exportable)
+  }
+
+  lines
+}
+
+make_signature_args <- function(x) {
+  paste0("SEXP ", x, collapse = ", ")
+}
+
+make_args <- function(x) {
+  paste0(x, collapse = ", ")
+}
+
+
+
