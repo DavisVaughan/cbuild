@@ -451,12 +451,9 @@ write_r_init_pkg <- function(lines, info, pkg) {
   lines <- add_lines(lines, header)
   lines <- add_lines(lines, register_routines)
   lines <- add_lines(lines, dynamic_symbols)
-  lines <- c(lines, new_line())
 
   lines <- write_register_callables(lines, info, pkg, hidden = TRUE)
-  lines <- c(lines, new_line())
   lines <- write_register_callables(lines, info, pkg, hidden = FALSE)
-  lines <- c(lines, new_line())
 
   lines <- write_init_functions(lines, info)
 
@@ -479,6 +476,7 @@ write_init_functions <- function(lines, info) {
 
   init_functions <- paste0("  ", names, "(dll);")
 
+  lines <- c(lines, new_line())
   lines <- add_lines(lines, init_functions)
   lines
 }
@@ -514,6 +512,8 @@ write_register_callables <- function(lines, info, pkg, hidden) {
     ");"
   )
 
+  lines <- c(lines, new_line())
+
   if (hidden) {
     lines <- add_lines(lines, "  // Hidden callable API registrations")
   } else {
@@ -541,6 +541,10 @@ collect_attributes_and_signatures <- function(path) {
   # Remove `init.c` file
   loc_init_c <- grepl(utils::glob2rx("*/init.c"), path_src_files)
   path_src_files <- path_src_files[!loc_init_c]
+
+  if (length(path_src_files) == 0L) {
+    return(new_signature_df())
+  }
 
   lst_of_attribute_df <- map(path_src_files, parse_attributes_and_signatures_in_file)
 

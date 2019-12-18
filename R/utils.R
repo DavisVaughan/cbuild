@@ -20,6 +20,10 @@ write_lines <- function(file, lines, sep = "") {
   invisible(file)
 }
 
+new_signature_df <- function(loc = integer(), attribute = character(), args = list(), signature = list()) {
+  data_frame(loc = loc, attribute = attribute, args = args, signature = signature)
+}
+
 new_attribute_df <- function(loc = integer(), attribute = character(), args = list()) {
   data_frame(loc = loc, attribute = attribute, args = args)
 }
@@ -84,15 +88,20 @@ double_quote <- function(x) {
 }
 
 unnest_args <- function(attributes) {
+  args <- attributes$args
+  attributes$args <- NULL
+
+  if (nrow(attributes) == 0L) {
+    return(attributes)
+  }
+
   lst_of_one_row_arg_dfs <- map(
-    attributes$args,
+    args,
     as.data.frame,
     stringsAsFactors = FALSE
   )
 
   arg_df <- do.call(rbind, lst_of_one_row_arg_dfs)
-
-  attributes$args <- NULL
 
   if (nrow(arg_df) == 0L) {
     attributes
