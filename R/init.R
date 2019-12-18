@@ -112,6 +112,12 @@ write_init <- function(path = ".", debug = FALSE) {
     abort("`debug` must be a bool (TRUE / FALSE).")
   }
 
+  path <- normalize_path(path, error = FALSE)
+
+  if (!dir.exists(path)) {
+    abort("`path` must point to an existing folder containing an R package.")
+  }
+
   if (!has_src(path)) {
     abort(
       "`path` must point to an R package with a `src` folder to ",
