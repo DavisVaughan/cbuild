@@ -42,7 +42,6 @@
 #' sourced$fn(1)
 #' @export
 source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
-  file <- normalize_path(file)
   lines <- read_lines(file)
 
   attributes <- parse_attributes(lines)
@@ -83,8 +82,8 @@ source_file <- function(file, includes = NULL, no_remap = TRUE, show = FALSE) {
   # as it will be "open" while R is using it
   on.exit(file.remove(path_src), add = TRUE)
 
-  path_src <- normalize_path(path_src, error = FALSE)
-  path_so <- normalize_path(path_so, error = FALSE)
+  path_src <- normalize_path(path_src)
+  path_so <- normalize_path(path_so)
 
   write_lines(path_src, lines, sep = "\n")
 
@@ -272,5 +271,9 @@ make_args <- function(x) {
   paste0(x, collapse = ", ")
 }
 
-
+# Very important for `make` on Windows to swap out the winslashes with
+# `/` not `\\`, otherwise the SHLIB call will not work
+normalize_path <- function(x) {
+  normalizePath(x, winslash = "/", mustWork = FALSE)
+}
 

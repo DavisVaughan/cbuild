@@ -112,8 +112,6 @@ write_init <- function(path = ".", debug = FALSE) {
     abort("`debug` must be a bool (TRUE / FALSE).")
   }
 
-  path <- normalize_path(path, error = FALSE)
-
   if (!dir.exists(path)) {
     abort("`path` must point to an existing folder containing an R package.")
   }
@@ -566,7 +564,6 @@ bind_file_name <- function(file, attribute_df) {
 }
 
 parse_attributes_and_signatures_in_file <- function(file) {
-  file <- normalize_path(file)
   lines <- read_lines(file)
 
   info <- parse_attributes(lines)
@@ -646,7 +643,6 @@ has_exports <- function(info, type) {
 }
 
 package_name <- function(path) {
-  path <- normalize_path(path)
   path_desc <- file.path(path, "DESCRIPTION")
 
   if (!file.exists(path_desc)) {
@@ -714,7 +710,6 @@ new_line <- function() {
 }
 
 dir_src <- function(path) {
-  path <- normalize_path(path)
   path_dir_src <- file.path(path, "src")
 
   if (!dir.exists(path_dir_src)) {
@@ -730,17 +725,10 @@ path_init <- function(path) {
 }
 
 has_src <- function(path) {
-  path <- normalize_path(path)
   path_src <- file.path(path, "src")
   dir.exists(path_src)
 }
 
 cat_line <- function(...) {
   cat(paste0(..., "\n", collapse = ""))
-}
-
-# Very important for `make` on Windows to swap out the winslashes with
-# `/` not `\\`, otherwise the SHLIB call will not work
-normalize_path <- function(x, error = TRUE) {
-  normalizePath(x, winslash = "/", mustWork = error)
 }
