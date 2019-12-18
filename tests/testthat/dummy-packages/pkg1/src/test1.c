@@ -27,3 +27,8 @@ void test1_fn5(DllInfo* dll) {
 void test1_fn6(DllInfo* dll) {
   return;
 }
+
+// [[ callable() ]]
+R_len_t test1_fn7(R_len_t y, int *x) {
+  return y;
+}

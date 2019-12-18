@@ -36,6 +36,7 @@ static const R_ExternalMethodDef ExtEntries[] = {
 
 // Callable API declarations
 extern SEXP test1_fn3(SEXP);
+extern R_len_t test1_fn7(R_len_t, int *);
 
 // Hidden callable API declarations
 extern SEXP test1_fn4(SEXP);
@@ -54,6 +55,7 @@ void R_init_test(DllInfo *dll) {
   // Callable API registrations
   R_RegisterCCallable("test", "test1_fn2",          (DL_FUNC) &test1_fn2);
   R_RegisterCCallable("test", "test1_fn3",          (DL_FUNC) &test1_fn3);
+  R_RegisterCCallable("test", "test1_fn7",          (DL_FUNC) &test1_fn7);
   R_RegisterCCallable("test", "test2_fn2_callable", (DL_FUNC) &test2_fn2);
 
   test1_fn5(dll);

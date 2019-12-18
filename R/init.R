@@ -278,7 +278,10 @@ package_name <- function(path) {
 }
 
 remove_exports <- function(callable, info) {
-  loc_all_exports <- info$attribute == "export" | info$attribute == "export_external"
+  loc_all_exports <- info$attribute == "export" |
+    info$attribute == "export_external" |
+    info$attribute == "export_external2"
+
   exports <- info[loc_all_exports,]
 
   if (nrow(exports) == 0L) {
@@ -312,7 +315,7 @@ write_callables <- function(lines, info, hidden) {
     return(lines)
   }
 
-  # Ensure callables have not already been declared by .Call or .External2
+  # Ensure callables have not already been declared by .Call or .External2/.External
   info <- remove_exports(callable, info)
 
   if (nrow(info) == 0L) {
@@ -323,10 +326,12 @@ write_callables <- function(lines, info, hidden) {
 
   names <- map_chr(signatures, function(x) x$name)
 
-  n_args <- map_int(signatures, function(x) x$n_args)
-  sexp_arg_list <- map_chr(n_args, make_sexp_arg_list)
+  types <- map(signatures, function(x) x$arg_types)
+  types <- map(types, function(x) paste0(x, collapse = ", "))
 
-  declarations <- paste0("extern SEXP ", names, "(", sexp_arg_list, ");")
+  return <- map_chr(signatures, function(x) x$return)
+
+  declarations <- paste0("extern ", return, " ", names, "(", types, ");")
 
   if (hidden) {
     lines <- add_lines(lines, "// Hidden callable API declarations")

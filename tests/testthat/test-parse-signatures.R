@@ -77,7 +77,16 @@ test_that("can parse a `callable` signature with non-SEXP arguments", {
   attrs <- parse_attributes(code)
   x <- parse_signatures(attrs, code)
 
-  expect <- list(name = "fn", name_callable = "fn", args = "x", n_args = 1, loc = 3)
+  expect <- list(
+    name = "fn",
+    name_callable = "fn",
+    return = "int",
+    arg_names = "x",
+    arg_types = "int",
+    n_args = 1L,
+    loc = 3
+  )
+
   expect <- list(expect)
 
   expect_equal(x$signature, expect)
@@ -86,7 +95,7 @@ test_that("can parse a `callable` signature with non-SEXP arguments", {
 test_that("can parse a `callable` signature with a pointer argument aligned with the variable name", {
   code <- to_lines("
     // [[ callable() ]]
-    int fn(int *x) {
+    int fn(int* x, int *y) {
       return;
     }
   ")
@@ -94,7 +103,16 @@ test_that("can parse a `callable` signature with a pointer argument aligned with
   attrs <- parse_attributes(code)
   x <- parse_signatures(attrs, code)
 
-  expect <- list(name = "fn", name_callable = "fn", args = "x", n_args = 1, loc = 3)
+  expect <- list(
+    name = "fn",
+    name_callable = "fn",
+    return = "int",
+    arg_names = c("x", "y"),
+    arg_types = c("int*", "int *"),
+    n_args = 2L,
+    loc = 3
+  )
+
   expect <- list(expect)
 
   expect_equal(x$signature, expect)

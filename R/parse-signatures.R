@@ -305,20 +305,17 @@ parse_signatures_callable_line <- function(loc, max_loc, name, lines) {
     stop("Cannot find opening parenthesis.", call. = FALSE)
   }
 
-  # Locate the opening parenthesis and work backwards from that to find the
-  # first space. This is the start of the function name
-  name_and_return <- substr(signature, 1L, opening_parenthesis_loc - 1L)
-  name_and_return <- trimws(name_and_return, which = "right")
+  return_and_name <- substr(signature, 1L, opening_parenthesis_loc - 1L)
+  return_and_name <- trimws(return_and_name, which = "right")
 
-  # TODO (this could definitely be better)
-  # - flip name + return value
-  # - locate first space (the start of the name)
-  # - trim up to that to get the name
-  # - rev back
-  rev_name_and_return <- rev_chr(name_and_return)
-  rev_name_end <- locate_text(" ", rev_name_and_return)
-  rev_name <- substr(rev_name_and_return, 1L, rev_name_end - 1L)
-  name_fn <- rev_chr(rev_name)
+  loc_last_space <- locate_last_space(return_and_name)
+
+  if (is.na(return_and_name)) {
+    abort("There must be a space between the return type and the function name.")
+  }
+
+  return <- substr(return_and_name, 1L, loc_last_space - 1L)
+  name_fn <- substr(return_and_name, loc_last_space + 1L, nchar(return_and_name))
 
   # Attribute name override with `export(name = value)`
   if (is.na(name)) {
@@ -333,25 +330,35 @@ parse_signatures_callable_line <- function(loc, max_loc, name, lines) {
   signature <- collect_signature_arguments(signature, loc_signature, max_loc, lines)
 
   args <- split_by_comma(signature)
-  args <- parse_arguments(args)
 
-  new_callable_info(loc_signature, name_fn, name_callable, args)
+  info <- parse_arguments_callable(args)
+  arg_names <- info$names
+  arg_types <- info$types
+
+  new_callable_info(loc_signature, name_fn, name_callable, return, arg_names, arg_types)
 }
 
-new_callable_info <- function(loc, name, name_callable, args) {
-  n_args <- length(args)
+new_callable_info <- function(loc, name, name_callable, return, arg_names, arg_types) {
+  n_args <- length(arg_names)
 
   list(
     name = name,
     name_callable = name_callable,
-    args = args,
+    return = return,
+    arg_names = arg_names,
+    arg_types = arg_types,
     n_args = n_args,
     loc = loc
   )
 }
 
 rev_chr <- function(x) {
-  paste0(rev(strsplit(x, "")[[1]]), collapse = "")
+  x_lst <- strsplit(x, "")
+  map_chr(x_lst, rev_and_collapse)
+}
+
+rev_and_collapse <- function(x) {
+  paste0(rev(x), collapse = "")
 }
 
 # ------------------------------------------------------------------------------
@@ -496,6 +503,43 @@ parse_arguments <- function(args) {
   args[has_pointer] <- substr(args[has_pointer], 2L, nchar(args))
 
   args
+}
+
+# Arguments could be anything,
+# like `int *varname` or `enum enum_thing varname`
+parse_arguments_callable <- function(args) {
+  args <- trimws(args, which = "both")
+
+  # Locate the last space and split there
+  loc_last_space <- locate_last_space(args)
+
+  if (any(is.na(loc_last_space))) {
+    abort("A valid argument has a space between the type and the argument name.")
+  }
+
+  types <- substr(args, 1L, loc_last_space - 1L)
+  names <- substr(args, loc_last_space + 1L, nchar(args))
+
+  # Rip off any pointers before the variable name
+  # Might be an arg like `int *varname`
+  has_pointer <- startsWith(names, "*")
+  names[has_pointer] <- substr(names[has_pointer], 2L, nchar(names[has_pointer]))
+  types[has_pointer] <- paste0(types[has_pointer], " *")
+
+  list(names = names, types = types)
+}
+
+locate_last_space <- function(x) {
+  lst_of_all_spaces <- gregexpr(" ", x, fixed = TRUE)
+  map_int(lst_of_all_spaces, pull_last_space_pos)
+}
+
+pull_last_space_pos <- function(x) {
+  if (identical(x[[1L]], -1L)) {
+    return(NA_integer_)
+  }
+
+  x[length(x)]
 }
 
 parse_arguments_exports <- function(args) {
