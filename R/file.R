@@ -257,10 +257,18 @@ write_exportables <- function(lines, signatures) {
 }
 
 make_signature_args <- function(x) {
+  if (length(x) == 0L) {
+    return("")
+  }
+
   paste0("SEXP ", x, collapse = ", ")
 }
 
 make_args <- function(x) {
+  if (length(x) == 0L) {
+    return("")
+  }
+
   paste0(x, collapse = ", ")
 }
 

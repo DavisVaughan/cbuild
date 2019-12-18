@@ -10,6 +10,18 @@ test_that("can source a code block", {
   expect_equal(x$fn(1), 1)
 })
 
+test_that("can source a code block with no arguments", {
+  code <- "
+    // [[ export() ]]
+    SEXP fn() {
+      return Rf_ScalarInteger(1);
+    }
+  "
+
+  x <- source_code(code)
+  expect_equal(x$fn(), 1)
+})
+
 test_that("can source two functions", {
   code <- "
     // [[ export() ]]
