@@ -2,46 +2,44 @@
 # init.c generation
 
 test_that("`src` directory with no `.c` files", {
-  print(cat2(write_init(package("test-1"), debug = TRUE)))
-
   verify_output(
     test_path("output/test-1.txt"),
-    cat2(write_init(package("test-1"), debug = TRUE))
+    cat2(write_init(test_path("packages/test-1"), debug = TRUE))
   )
 })
 
 test_that("`src` directory with just a `init.c` file that we created", {
   verify_output(
     test_path("output/test-2.txt"),
-    cat2(write_init(package("test-2"), debug = TRUE))
+    cat2(write_init(test_path("packages/test-2"), debug = TRUE))
   )
 })
 
 test_that("`src` directory with .c files, but none are exported", {
   verify_output(
     test_path("output/test-3.txt"),
-    cat2(write_init(package("test-3"), debug = TRUE))
+    cat2(write_init(test_path("packages/test-3"), debug = TRUE))
   )
 })
 
 test_that("can write an init file for a single function", {
   verify_output(
     test_path("output/test-4.txt"),
-    cat2(write_init(package("test-4"), debug = TRUE))
+    cat2(write_init(test_path("packages/test-4"), debug = TRUE))
   )
 })
 
 test_that("can write an init file for two functions", {
   verify_output(
     test_path("output/test-5.txt"),
-    cat2(write_init(package("test-5"), debug = TRUE))
+    cat2(write_init(test_path("packages/test-5"), debug = TRUE))
   )
 })
 
 test_that("can write an init file for two functions in different files", {
   verify_output(
     test_path("output/test-6.txt"),
-    cat2(write_init(package("test-6"), debug = TRUE))
+    cat2(write_init(test_path("packages/test-6"), debug = TRUE))
   )
 })
 

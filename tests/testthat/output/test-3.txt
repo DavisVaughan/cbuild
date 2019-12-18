@@ -1,4 +1,4 @@
-> cat2(write_init(package("test-3"), debug = TRUE))
+> cat2(write_init(test_path("packages/test-3"), debug = TRUE))
 // File generated automatically by cbuild - please do not modify by hand
 
 #include <R.h>
