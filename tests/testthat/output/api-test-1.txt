@@ -1,0 +1,48 @@
+> cat2(x$init)
+// File generated automatically by cbuild - please do not modify by hand
+
+#include <R.h>
+#include <Rinternals.h>
+#include <stdlib.h> // for NULL
+#include <stdbool.h> // for bool
+#include <R_ext/Rdynload.h>
+
+// Callable API declarations
+extern SEXP file1_fn1(SEXP);
+
+void R_init_test(DllInfo *dll) {
+  R_registerRoutines(dll, NULL, NULL, NULL, NULL);
+  R_useDynamicSymbols(dll, FALSE);
+
+  // Callable API registrations
+  R_RegisterCCallable("test", "file1_fn1", (DL_FUNC) &file1_fn1);
+}
+
+
+> cat2(x$api_c)
+// File generated automatically by cbuild - please do not modify by hand
+
+#include "test.h"
+
+SEXP (*file1_fn1)(SEXP) = NULL;
+
+void test_init_api() {
+  file1_fn1 = (SEXP (*)(SEXP)) R_GetCCallable("test", "file1_fn1");
+}
+
+> cat2(x$api_h)
+// File generated automatically by cbuild - please do not modify by hand
+
+#ifndef TEST_H
+#define TEST_H
+
+#include <Rinternals.h>
+#include <R_ext/Rdynload.h>
+#include <stdbool.h>
+
+SEXP (*file1_fn1)(SEXP);
+
+void test_init_api();
+
+#endif
+

@@ -27,7 +27,7 @@ The goal of cbuild is to provide tools for working with C both interactively and
 
 - Provide a way to interactively source C code into your R session. See `source_function()` and `source_code()` to get started.
 
-- Provide an automatic registration system for R package developers that use C, see `write_init()`. It can automatically generate the `init.c` file for you, using a comment system similar to `Rcpp::export`. For example, the following would generate an entry for the C function `fn()` in `init.c`, and generate the glue code to export it as an R routine named `fn`, which you could call from the R side with `.Call(fn, 1)`:
+- Provide an automatic registration system for R package developers that use C, see `process_attributes()`. It can automatically generate the `init.c` file for you, using a comment system similar to `Rcpp::export`. For example, the following would generate an entry for the C function `fn()` in `init.c`, and generate the glue code to export it as an R routine named `fn`, which you could call from the R side with `.Call(fn, 1)`:
 
   ```
   // [[ export() ]]

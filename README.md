@@ -21,12 +21,12 @@ are:
     See `source_function()` and `source_code()` to get started.
 
   - Provide an automatic registration system for R package developers
-    that use C, see `write_init()`. It can automatically generate the
-    `init.c` file for you, using a comment system similar to
-    `Rcpp::export`. For example, the following would generate an entry
-    for the C function `fn()` in `init.c`, and generate the glue code to
-    export it as an R routine named `fn`, which you could call from the
-    R side with `.Call(fn, 1)`:
+    that use C, see `process_attributes()`. It can automatically
+    generate the `init.c` file for you, using a comment system similar
+    to `Rcpp::export`. For example, the following would generate an
+    entry for the C function `fn()` in `init.c`, and generate the glue
+    code to export it as an R routine named `fn`, which you could call
+    from the R side with `.Call(fn, 1)`:
     
         // [[ export() ]]
         SEXP fn(SEXP x) {
