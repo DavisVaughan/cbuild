@@ -1,0 +1,17 @@
+
+```{r}
+library(cbuild)
+```
+
+```{cbuild}
+// [[ export() ]]
+SEXP fn(SEXP x) {
+  return x;
+}
+```
+
+```{r}
+fn(1)
+```
+
+

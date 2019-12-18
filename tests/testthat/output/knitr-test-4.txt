@@ -1,0 +1,26 @@
+> cat(readLines(path_knitr), sep = "\n")
+
+
+```r
+library(cbuild)
+```
+
+
+```cbuild
+// [[ export() ]]
+SEXP fn() {
+  return ScalarReal(5);
+}
+```
+
+
+```r
+fn()
+```
+
+```
+## [1] 5
+```
+
+
+

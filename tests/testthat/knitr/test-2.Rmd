@@ -1,0 +1,18 @@
+
+```{r}
+library(cbuild)
+env <- new.env()
+```
+
+```{cbuild, cbuild.env = "env"}
+// [[ export() ]]
+SEXP fn(SEXP x) {
+  return x;
+}
+```
+
+```{r}
+env$fn(1)
+```
+
+

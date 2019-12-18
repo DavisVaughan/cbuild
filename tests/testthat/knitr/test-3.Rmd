@@ -1,0 +1,18 @@
+
+```{r}
+library(cbuild)
+```
+
+```{cbuild, cbuild.includes = "Rdefines.h"}
+// [[ export() ]]
+SEXP fn(SEXP x) {
+  double* p_x = NUMERIC_POINTER(x);
+  return Rf_ScalarReal(p_x[0] + 1);
+}
+```
+
+```{r}
+fn(1)
+```
+
+

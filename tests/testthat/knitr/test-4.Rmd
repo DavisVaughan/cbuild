@@ -1,0 +1,17 @@
+
+```{r}
+library(cbuild)
+```
+
+```{cbuild, cbuild.no_remap = FALSE}
+// [[ export() ]]
+SEXP fn() {
+  return ScalarReal(5);
+}
+```
+
+```{r}
+fn()
+```
+
+
