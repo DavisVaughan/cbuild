@@ -1,4 +1,14 @@
 # ------------------------------------------------------------------------------
+# init.c generation
+
+test_that("`src` directory with no `.c` files", {
+  verify_output(
+    test_path("output/test-1.txt"),
+    cat2(write_init(package("test-1"), debug = TRUE))
+  )
+})
+
+# ------------------------------------------------------------------------------
 # `path` validation
 
 test_that("`path` must point to an existing directory", {
@@ -66,7 +76,7 @@ test_that("`path` is validated", {
 })
 
 test_that("`debug` is validated", {
-  expect_error(write_init(path = 1), "must be a bool")
+  expect_error(write_init(debug = 1), "must be a bool")
   expect_error(write_init(debug = c(TRUE, FALSE)), "must be a bool")
   expect_error(write_init(debug = NA), "must be a bool")
 })
