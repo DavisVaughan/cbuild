@@ -253,15 +253,15 @@ can_write_api <- function(path, pkg) {
     return(TRUE)
   }
 
-  has_api_c <- has_path_api_c(path)
-  has_api_h <- has_path_api_h(path)
+  has_api_c <- has_path_api_c(path, pkg)
+  has_api_h <- has_path_api_h(path, pkg)
 
   if (!has_api_c && !has_api_h) {
     return(TRUE)
   }
 
-  first_line_api_c <- readLines(path_api_c(path), n = 1L)
-  first_line_api_h <- readLines(path_api_h(path), n = 1L)
+  first_line_api_c <- readLines(path_api_c(path, pkg), n = 1L)
+  first_line_api_h <- readLines(path_api_h(path, pkg), n = 1L)
 
   made_by_cbuild <-
     identical(first_line_api_c, do_not_modify()) &&
@@ -318,11 +318,11 @@ has_path_api_h <- function(path, pkg) {
 }
 
 path_api_c <- function(path, pkg) {
-  file.path(path, paste0(pkg, ".c"))
+  file.path(dir_include(path), paste0(pkg, ".c"))
 }
 
 path_api_h <- function(path, pkg) {
-  file.path(path, paste0(pkg, ".h"))
+  file.path(dir_include(path), paste0(pkg, ".h"))
 }
 
 dir_inst <- function(path) {
