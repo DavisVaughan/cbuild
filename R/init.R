@@ -104,11 +104,11 @@
 #'
 #' @export
 write_init <- function(path = ".", debug = FALSE) {
-  if (!is.character(path) || is.na(path) || length(path) != 1L) {
+  if (length(path) != 1L || !is.character(path) || is.na(path)) {
     abort("`path` must be a string.")
   }
 
-  if (!is.logical(debug) || is.na(debug) || length(debug) != 1L) {
+  if (length(debug) != 1L || !is.logical(debug) || is.na(debug)) {
     abort("`debug` must be a bool (TRUE / FALSE).")
   }
 
