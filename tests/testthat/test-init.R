@@ -2,6 +2,8 @@
 # init.c generation
 
 test_that("`src` directory with no `.c` files", {
+  print(normalize_path(test_path("packages/test-1"), error = FALSE))
+
   verify_output(
     test_path("output/test-1.txt"),
     cat2(write_init(test_path("packages/test-1"), debug = TRUE))
