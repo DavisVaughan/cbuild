@@ -1,0 +1,24 @@
+> cat2(write_init(package("test-4"), debug = TRUE))
+// File generated automatically by cbuild - please do not modify by hand
+
+#include <R.h>
+#include <Rinternals.h>
+#include <stdlib.h> // for NULL
+#include <stdbool.h> // for bool
+#include <R_ext/Rdynload.h>
+
+// .Call declarations
+extern SEXP file1_fn1(SEXP);
+
+// .Call entries
+static const R_CallMethodDef CallEntries[] = {
+  {"file1_fn1", (DL_FUNC) &file1_fn1, 1},
+  {NULL, NULL, 0}
+};
+
+void R_init_test(DllInfo *dll) {
+  R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+  R_useDynamicSymbols(dll, FALSE);
+}
+
+

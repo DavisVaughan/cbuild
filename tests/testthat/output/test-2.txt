@@ -1,0 +1,15 @@
+> cat2(write_init(package("test-2"), debug = TRUE))
+// File generated automatically by cbuild - please do not modify by hand
+
+#include <R.h>
+#include <Rinternals.h>
+#include <stdlib.h> // for NULL
+#include <stdbool.h> // for bool
+#include <R_ext/Rdynload.h>
+
+void R_init_test(DllInfo *dll) {
+  R_registerRoutines(dll, NULL, NULL, NULL, NULL);
+  R_useDynamicSymbols(dll, FALSE);
+}
+
+
