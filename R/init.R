@@ -710,23 +710,15 @@ new_line <- function() {
 }
 
 dir_src <- function(path) {
-  path_dir_src <- file.path(path, "src")
-
-  if (!dir.exists(path_dir_src)) {
-    ""
-  } else {
-    path_dir_src
-  }
+  file.path(path, "src")
 }
 
 path_init <- function(path) {
-  path_src <- dir_src(path)
-  file.path(path_src, "init.c")
+  file.path(dir_src(path), "init.c")
 }
 
 has_src <- function(path) {
-  path_src <- file.path(path, "src")
-  dir.exists(path_src)
+  dir.exists(dir_src(path))
 }
 
 cat_line <- function(...) {
